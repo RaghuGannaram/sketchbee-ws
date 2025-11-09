@@ -1,0 +1,216 @@
+### health check
+GET http://localhost:5000/health-check HTTP/1.1
+
+### registration
+POST http://localhost:5000/api/v1/auth/register HTTP/1.1
+Content-Type: application/json
+
+{   
+    "fullname": "Test 2",
+    "handle": "test2",
+    "email": "test2@fakemail.com",
+    "password": "1234"
+}
+
+### login
+POST http://localhost:5000/api/v1/auth/login HTTP/1.1
+Content-Type: application/json
+
+{   
+    "email": "steve@fakemail.com",
+    "password": "1234"
+}
+
+### refresh token
+POST http://localhost:5000/api/v1/auth/refresh-token HTTP/1.1
+Content-Type: application/json
+Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Mzc4NmQ5NTY5OGE5MDFjYTNhMzgwNCIsImZ1bGxuYW1lIjoiVGVzdCAxIiwiaGFuZGxlIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MTQ5MTg5ODEsImV4cCI6MTcxNDk5ODE4MSwiYXVkIjoiNjYzNzg2ZDk1Njk4YTkwMWNhM2EzODA0IiwiaXNzIjoibmV4dXMucmFnaHVnYW5uYXJhbS5jb20ifQ.XlpPbd71dcKxxNrOKFZqDFtql6vin9GyGIERuoLsSQo
+
+### logout
+DELETE http://localhost:5000/api/v1/auth/logout HTTP/1.1
+Content-Type: application/json
+Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Mzc4NmQ5NTY5OGE5MDFjYTNhMzgwNCIsImZ1bGxuYW1lIjoiVGVzdCAxIiwiaGFuZGxlIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MTQ5MTk0MjcsImV4cCI6MTcxNDk5ODYyNywiYXVkIjoiNjYzNzg2ZDk1Njk4YTkwMWNhM2EzODA0IiwiaXNzIjoibmV4dXMucmFnaHVnYW5uYXJhbS5jb20ifQ.MiefcZQvLc4HFJGIOBz3YkwiK10Is6DO1uDJR_8-kxo
+
+
+### all users
+GET http://localhost:5000/api/v1/user/all HTTP/1.1
+
+### user by id
+GET http://localhost:5000/api/v1/user/663786d95698a901ca3a3804 HTTP/1.1
+
+### update user
+PUT http://localhost:5000/api/v1/user HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{   
+    "userId": "6637aa71671224934a3cfc78",
+    "fullname": "Omi Baba",
+    "bio": "I'm a developer.",
+    "city": "Bangalore",
+    "from": "India",
+    "role": "admin",
+    "handle": "omi"
+}
+
+### follow user
+PUT http://localhost:5000/api/v1/user/follow HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "followeeId": "6637aa5f671224934a3cfc72"
+}
+
+### delete user
+DELETE http://localhost:5000/api/v1/user/663786f35698a901ca3a380a HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Mzc4NmYzNTY5OGE5MDFjYTNhMzgwYSIsImZ1bGxuYW1lIjoiVGVzdCAxIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyMTQzNywiZXhwIjoxNzE0OTI4NjM3LCJhdWQiOiI2NjM3ODZmMzU2OThhOTAxY2EzYTM4MGEiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.dkYr-cloYZ8_mPIZlW3BY5sb4fMUscFYZnEQUl6SPVo
+
+
+### all posts
+GET http://localhost:5000/api/v1/post/all HTTP/1.1
+
+### get user posts
+GET http://localhost:5000/api/v1/post/user/6637aa71671224934a3cfc78 HTTP/1.1
+
+### post by id
+GET http://localhost:5000/api/v1/post/6637a5815c7c00ad283c4309 HTTP/1.1
+
+### get timeline posts
+GET http://localhost:5000/api/v1/post/timeline HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTVmNjcxMjI0OTM0YTNjZmM3MiIsImZ1bGxuYW1lIjoiVGVzdCAxIiwiaGFuZGxlIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE1MSwiZXhwIjoxNzE0OTMxMzUxLCJhdWQiOiI2NjM3YWE1ZjY3MTIyNDkzNGEzY2ZjNzIiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.cJKqY3JedqhS83YPyv0zd6FRepmcXO86falorhx09Oo
+
+### create post
+POST http://localhost:5000/api/v1/post HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "description": "Hello World Z...!"
+}
+
+### update post
+PUT http://localhost:5000/api/v1/post HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "postId": "6637ab0b671224934a3cfc88",
+    "description": "I'm not a hero. I'm a high-functioning sociopath."
+}
+
+### like post
+PUT http://localhost:5000/api/v1/post/like HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "postId": "6637ab0b671224934a3cfc88"
+}
+
+### delete post
+DELETE http://localhost:5000/api/v1/post HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "postId": "6637ab0e671224934a3cfc8b"
+}
+
+### all comments
+GET http://localhost:5000/api/v1/comment/all HTTP/1.1
+
+### user comments
+GET http://localhost:5000/api/v1/comment/user/6637aa71671224934a3cfc78 HTTP/1.1
+
+### post comments
+GET http://localhost:5000/api/v1/comment/post/6637ab0b671224934a3cfc88 HTTP/1.1
+
+### create comment
+POST http://localhost:5000/api/v1/comment HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{   
+    "postId": "6637ab0b671224934a3cfc88",
+    "description": "Great"
+}
+
+### update comment
+PUT http://localhost:5000/api/v1/comment HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "commentId": "6637b1f9cebd36c1ae01eac2",
+    "description": "Rogered that! Over and out!!!"
+}
+
+### like comment
+PUT http://localhost:5000/api/v1/comment/like
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "commentId": "6637b1f9cebd36c1ae01eac2"
+}
+
+### delete comment
+DELETE http://localhost:5000/api/v1/comment HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdhYTcxNjcxMjI0OTM0YTNjZmM3OCIsImZ1bGxuYW1lIjoiVGVzdCAyIiwiaGFuZGxlIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNDkyNDE0NSwiZXhwIjoxNzE0OTMxMzQ1LCJhdWQiOiI2NjM3YWE3MTY3MTIyNDkzNGEzY2ZjNzgiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.5jB_7eeRi2tuKgFqvY3NL3fiV0ur3p0kH00ZnlyK5fY
+Content-Type: application/json
+
+{
+    "commentId": "6637b4abf5fab1043e04bbf8"
+}
+
+
+### all chats
+GET http://localhost:5000/api/v1/chat/all HTTP/1.1
+
+### user chats
+GET http://localhost:5000/api/v1/chat/private HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+
+
+### group chats
+GET http://localhost:5000/api/v1/chat/group HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+
+### chat members
+GET http://localhost:5000/api/v1/chat/members/663e61b82dcc44b966bdbb01 HTTP/1.
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+
+### creat chat
+POST http://localhost:5000/api/v1/chat HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+Content-Type: application/json
+
+{
+    "participantId": "663af9bb8c10a5b9c699f940"
+}
+
+###create group chat
+POST http://localhost:5000/api/v1/chat/group HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+Content-Type: application/json
+
+{   
+    "groupName": "Super Heros...!",
+    "participantList": ["663af9bb8c10a5b9c699f940", "663b2227236f30280ab3bd31"]
+}
+
+### get messages
+GET http://localhost:5000/api/v1/message/663e61b82dcc44b966bdbb01 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+
+
+### send message
+POST http://localhost:5000/api/v1/message HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MzdiZjUxOTkzZmU5OWUwZTIwNGIzZCIsImZ1bGxuYW1lIjoiU3RldmUgUm9nZXJzIiwiaGFuZGxlIjoic3RldmUiLCJlbWFpbCI6InN0ZXZlQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxNTM2NDE4MSwiZXhwIjoxNzE1MzcxMzgxLCJhdWQiOiI2NjM3YmY1MTk5M2ZlOTllMGUyMDRiM2QiLCJpc3MiOiJuZXh1cy5yYWdodWdhbm5hcmFtLmNvbSJ9.CsdPxovXsgulIhfICgFl-2AVgK02dAcroqtquiwLqs4
+Content-Type: application/json
+
+{
+    "chatId": "663e67adf7bbecc66aaa78b8",
+    "content": "Hello boyz..."
+}
