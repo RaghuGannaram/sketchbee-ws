@@ -1,1 +1,1 @@
-SetchBee Web Services | A RESTful API and WebSocket for SketchBee
+# SketchBee WS

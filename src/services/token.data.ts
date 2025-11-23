@@ -1,7 +1,7 @@
 import JWT from "jsonwebtoken";
-import ms from "ms";
+import ms, {type StringValue} from "ms";
 import sessionStore from "@src/configs/session.config";
-import { getJWTInfo } from "@src/utils/env-info";
+import envAccess from "@src/configs/env.config";
 import {
     DataError,
     DataErrors,
@@ -13,30 +13,26 @@ import type { ITokenPayload } from "@src/types";
 import logger from "@src/configs/logger.config";
 
 const { accessTokenSecret, refreshTokenSecret, accessTokenValidity, refreshTokenValidity, refreshTokenMaxAge } =
-    getJWTInfo();
+    envAccess.jwt.credentials();
 
 const issueAccessToken = catchAsyncDataError(async (user: ITokenPayload) => {
     logger.debug(`token.service: issuing access token for user: %o`, user);
 
     const payload = {
-        id: user.id,
-        fullname: user.fullname,
-        handle: user.handle,
-        email: user.email,
-        role: user.role,
+        profile : user.profile,
         type: "access",
     };
 
     const options = {
-        expiresIn: ms(accessTokenValidity) / 1000,
+        expiresIn: ms(accessTokenValidity as StringValue) / 1000,
         issuer: "sketchbee.raghugannaram.com",
-        audience: user.id,
+        audience: user.profile.id,
     };
 
     const token = JWT.sign(payload, accessTokenSecret, options);
 
     try {
-        await sessionStore.set(`access:${user.id}`, token, ms(accessTokenValidity) / 1000);
+        await sessionStore.set(`access:${user.profile.id}`, token, ms(accessTokenValidity as StringValue) / 1000);
     } catch (error) {
         processCacheError(error);
     }
@@ -48,24 +44,20 @@ const issueRefreshToken = catchAsyncDataError(async (user: ITokenPayload) => {
     logger.debug(`token.service: issuing refresh token for user: %o`, user);
 
     const payload = {
-        id: user.id,
-        fullname: user.fullname,
-        handle: user.handle,
-        email: user.email,
-        role: user.role,
+        profile : user.profile,
         type: "refresh",
     };
 
     const options = {
-        expiresIn: ms(refreshTokenValidity) / 1000,
+        expiresIn: ms(refreshTokenValidity as StringValue) / 1000,
         issuer: "sketchbee.raghugannaram.com",
-        audience: user.id,
+        audience: user.profile.id,
     };
 
     const token = JWT.sign(payload, refreshTokenSecret, options);
 
     try {
-        await sessionStore.set(`refresh:${user.id}`, token, ms(refreshTokenValidity) / 1000);
+        await sessionStore.set(`refresh:${user.profile.id}`, token, ms(refreshTokenValidity as StringValue) / 1000);
     } catch (error) {
         processCacheError(error);
     }
@@ -86,7 +78,7 @@ const validateAccessToken = catchAsyncDataError(async (accessToken: string) => {
 
     let storedAccessToken: string | null = null;
     try {
-        storedAccessToken = await sessionStore.get(`access:${decoded.id}`);
+        storedAccessToken = await sessionStore.get(`access:${decoded.profile.id}`);
     } catch (error) {
         processCacheError(error);
     }
@@ -109,7 +101,7 @@ const validateRefreshToken = catchAsyncDataError(async (refreshToken: string) =>
 
     let storedRefreshToken: string | null = null;
     try {
-        storedRefreshToken = await sessionStore.get(`refresh:${decoded.id}`);
+        storedRefreshToken = await sessionStore.get(`refresh:${decoded.profile.id}`);
     } catch (error) {
         processCacheError(error);
     }
@@ -118,7 +110,7 @@ const validateRefreshToken = catchAsyncDataError(async (refreshToken: string) =>
         throw new DataError(DataErrors.DATA_INVALID_TOKEN, "incorrect refresh token.");
     }
 
-    if (Date.now() - (decoded.iat ?? 0) * 1000 > ms(refreshTokenMaxAge)) {
+    if (Date.now() - (decoded.iat ?? 0) * 1000 > ms(refreshTokenMaxAge as StringValue)) {
         throw new DataError(DataErrors.TOKEN_EXCEEDED_MAX_AGE, "refresh token has exceeded maximum lifetime.");
     }
 

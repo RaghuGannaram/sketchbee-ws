@@ -12,8 +12,7 @@ export interface UserDocument extends Document {
     city: string;
     from: string;
     role: "user" | "moderator" | "admin";
-    followers: Types.ObjectId[];
-    followees: Types.ObjectId[];
+    friends: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -76,14 +75,7 @@ const userSchema = new Schema<UserDocument>(
             enum: ["user", "moderator", "admin"],
             default: "user",
         },
-        followers: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "User",
-                default: [],
-            },
-        ],
-        followees: [
+        friends: [
             {
                 type: Schema.Types.ObjectId,
                 ref: "User",
@@ -99,7 +91,7 @@ const userSchema = new Schema<UserDocument>(
         timestamps: true,
         toJSON: {
             virtuals: true,
-            transform: (_doc, ret) => {
+            transform: (_doc, ret: Record<string, any>) => {
                 ret["id"] = ret["_id"].toHexString();
                 delete ret["_id"];
                 delete ret["__v"];
@@ -109,7 +101,7 @@ const userSchema = new Schema<UserDocument>(
         },
         toObject: {
             virtuals: true,
-            transform: (_doc, ret) => {
+            transform: (_doc, ret: Record<string, any>) => {
                 ret["id"] = ret["_id"].toHexString();
                 delete ret["_id"];
                 delete ret["__v"];

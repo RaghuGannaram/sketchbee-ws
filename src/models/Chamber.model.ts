@@ -1,25 +1,18 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-export interface ChatDocument extends Document {
+export interface ChamberDocument extends Document {
     id: string;
     name: string;
-    displayPicture: string;
     participants: Types.ObjectId[];
-    isGroupChat: boolean;
-    lastMessage: Types.ObjectId | null;
     createdAt: Date;
     updatedAt: Date;
 }
 
-const chatSchema = new Schema<ChatDocument>(
+const chamberSchema = new Schema<ChamberDocument>(
     {
         name: {
             type: String,
             default: "",
-        },
-        displayPicture: {
-            type: String,
-            default: "default-group-dp.png",
         },
         participants: [
             {
@@ -28,25 +21,16 @@ const chatSchema = new Schema<ChatDocument>(
                 default: [],
             },
         ],
-        isGroupChat: {
-            type: Boolean,
-            default: false,
-        },
-        lastMessage: {
-            type: Schema.Types.ObjectId,
-            ref: "Message",
-            default: null,
-        },
     },
     {
-        collection: "chatCollection",
+        collection: "chamberCollection",
         autoIndex: true,
         optimisticConcurrency: true,
         bufferTimeoutMS: 10000,
         timestamps: true,
         toJSON: {
             virtuals: true,
-            transform: (_doc, ret) => {
+            transform: (_doc, ret: Record<string, any>) => {
                 ret["id"] = ret["_id"].toHexString();
                 delete ret["_id"];
                 delete ret["__v"];
@@ -56,7 +40,7 @@ const chatSchema = new Schema<ChatDocument>(
         },
         toObject: {
             virtuals: true,
-            transform: (_doc, ret) => {
+            transform: (_doc, ret: Record<string, any>) => {
                 ret["id"] = ret["_id"].toHexString();
                 delete ret["_id"];
                 delete ret["__v"];
@@ -67,6 +51,6 @@ const chatSchema = new Schema<ChatDocument>(
     }
 );
 
-const ChatModel = model<ChatDocument>("Chat", chatSchema);
+const ChamberModel = model<ChamberDocument>("Chamber", chamberSchema);
 
-export default ChatModel;
+export default ChamberModel;

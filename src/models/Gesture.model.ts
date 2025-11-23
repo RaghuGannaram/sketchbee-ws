@@ -1,23 +1,22 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-export interface MessageDocument extends Document {
+export interface GestureDocument extends Document {
     id: string;
-    chat: Types.ObjectId;
+    chamber: Types.ObjectId;
     sender: Types.ObjectId;
     content: string;
     createdAt: Date;
     updatedAt: Date;
 }
 
-const messageSchema = new Schema<MessageDocument>(
+const gestureSchema = new Schema<GestureDocument>(
     {
-        chat: {
+        chamber: {
             type: Schema.Types.ObjectId,
-            ref: "Chat",
+            ref: "Chamber",
             required: true,
         },
         sender: {
-            
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
@@ -28,14 +27,14 @@ const messageSchema = new Schema<MessageDocument>(
         },
     },
     {
-        collection: "messageCollection",
+        collection: "gestureCollection",
         autoIndex: true,
         optimisticConcurrency: true,
         bufferTimeoutMS: 10000,
         timestamps: true,
         toJSON: {
             virtuals: true,
-            transform: (_doc, ret) => {
+            transform: (_doc, ret: Record<string, any>) => {
                 ret["id"] = ret["_id"].toHexString();
                 delete ret["_id"];
                 delete ret["__v"];
@@ -45,7 +44,7 @@ const messageSchema = new Schema<MessageDocument>(
         },
         toObject: {
             virtuals: true,
-            transform: (_doc, ret) => {
+            transform: (_doc, ret: Record<string, any>) => {
                 ret["id"] = ret["_id"].toHexString();
                 delete ret["_id"];
                 delete ret["__v"];
@@ -56,6 +55,6 @@ const messageSchema = new Schema<MessageDocument>(
     }
 );
 
-const MessageModel = model<MessageDocument>("Message", messageSchema);
+const GestureModel = model<GestureDocument>("Gesture", gestureSchema);
 
-export default MessageModel;
+export default GestureModel;

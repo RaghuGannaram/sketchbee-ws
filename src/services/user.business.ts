@@ -1,12 +1,10 @@
 import userDataService from "@src/services/user.data";
-import postDataService from "@src/services/post.data";
-import commentDataService from "@src/services/comment.data";
 import awsDataService from "@src/services/aws.data";
 import tokenDataService from "@src/services/token.data";
 import imageDataService from "@src/services/image.data";
 import constants from "@src/constants";
 import { BusinessError, BusinessErrors, catchAsyncBusinessError } from "@src/utils/application-errors";
-import type { IAuthUser, IUserUpdate, IUserFileUpdate } from "@src/types";
+import type { IAuthUser} from "@src/types";
 import logger from "@src/configs/logger.config";
 
 const getAllUsers = catchAsyncBusinessError(async function () {
@@ -38,27 +36,13 @@ const getUserByID = catchAsyncBusinessError(async function (userId: string) {
         await awsDataService.getFile(user.background),
     ]);
 
-    user.followers = await Promise.all(
-        user.followers.map(async (follower) => {
-            follower.avatar = await awsDataService.getFile(follower.avatar);
-            return follower;
-        })
-    );
-
-    user.followees = await Promise.all(
-        user.followees.map(async (followee) => {
-            followee.avatar = await awsDataService.getFile(followee.avatar);
-            return followee;
-        })
-    );
-
     return user;
 });
 
 const updateUserInfo = catchAsyncBusinessError(async function (
     authUser: IAuthUser,
     userId: string,
-    updateData: IUserUpdate
+    updateData: any
 ) {
     logger.info(`user.business: updating user details for user: %s`, userId);
 
@@ -78,7 +62,7 @@ const updateUserInfo = catchAsyncBusinessError(async function (
 const updateUserImage = catchAsyncBusinessError(async function (
     authUser: IAuthUser,
     userId: string,
-    updateData: IUserFileUpdate
+    updateData: any
 ) {
     logger.info(`user.business: updating user image for user: %s`, userId);
 
@@ -152,8 +136,6 @@ const deleteUser = catchAsyncBusinessError(async function (authUser: IAuthUser, 
 
     await Promise.all([
         userDataService.deleteUserRecord(userId),
-        postDataService.deleteUserPostRecords(userId),
-        commentDataService.deleteUserCommentRecords(userId),
     ]);
 
     return;

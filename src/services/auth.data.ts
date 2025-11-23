@@ -42,15 +42,10 @@ const validateUserRecord = catchAsyncDataError(async function (userCredentials: 
     let userDoc: UserDocument | null = null;
 
     try {
-        userDoc = await UserModel.findOne({ email: email })
-            .populate({
-                path: "followers",
-                select: "id fullname handle avatar",
-            })
-            .populate({
-                path: "followees",
-                select: "id fullname handle avatar",
-            });
+        userDoc = await UserModel.findOne({ email: email }).populate({
+            path: "friends",
+            select: "id fullname handle avatar",
+        });
     } catch (error) {
         processMongoError(error);
     }

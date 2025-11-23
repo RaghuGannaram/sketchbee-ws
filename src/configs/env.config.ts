@@ -1,4 +1,3 @@
-// src/config/env.ts
 import { LogLevel, ErrorExposureDepth, CacheProvider, type ICacheCredentials } from "@src/types";
 
 const envAccess = {
@@ -82,19 +81,6 @@ const envAccess = {
 				bucket: process.env["AWS_BUCKET_NAME"],
 				signedUrlValidity: process.env["AWS_SIGNED_URL_EXPIRATION"],
 				cloudFrontUrl: process.env["AWS_CLOUD_FRONT_URL"],
-			};
-		},
-	},
-	acr: {
-		credentials(): {
-			host: string;
-			accessKey: string;
-			accessSecret: string;
-		} {
-			return {
-				host: process.env["ACR_HOST"],
-				accessKey: process.env["ACR_ACCESS_KEY"],
-				accessSecret: process.env["ACR_ACCESS_SECRET"],
 			};
 		},
 	},

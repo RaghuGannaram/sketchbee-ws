@@ -1,16 +1,16 @@
-import ms from "ms";
+import ms, {type StringValue} from "ms";
 import AWS from "@src/configs/aws.config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getAWSParams } from "@src/utils/env-info";
+import envAccess from "@src/configs/env.config";
 import { generateRandomName } from "@src/utils";
 import { catchAsyncDataError, processAWSError } from "@src/utils/application-errors";
 import logger from "@src/configs/logger.config";
 
-const { bucket } = getAWSParams();
+const { bucket } = envAccess.aws.credentials();
 
 const getFile = catchAsyncDataError(async (key: string): Promise<string> => {
     logger.debug(`aws.service: getting signed URL for file: %s from s3 bucket`, key);
-
+    
     let fileURL = "";
     const params = {
         Bucket: bucket,
@@ -19,7 +19,7 @@ const getFile = catchAsyncDataError(async (key: string): Promise<string> => {
 
     try {
         fileURL = await getSignedUrl(AWS.s3ClientInstance, new AWS.GetObjectCommand(params), {
-            expiresIn: ms(AWS.signedURLValidity) / 1000,
+            expiresIn: ms(AWS.signedUrlValidity as StringValue) / 1000,
         });
     } catch (error) {
         processAWSError(error);

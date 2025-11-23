@@ -17,11 +17,12 @@ const createUser = catchAsyncBusinessError(async function (registrationData: IRe
     ]);
 
     const payload: ITokenPayload = {
-        id: user.id,
-        fullname: user.fullname,
-        handle: user.handle,
-        email: user.email,
-        role: user.role,
+        profile: {
+            id: user.id,
+            fullname: user.fullname,
+            handle: user.handle,
+            role: user.role,
+        },
     };
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -45,11 +46,12 @@ const validateUser = catchAsyncBusinessError(async function (userCredentials: IL
     ]);
 
     const payload: ITokenPayload = {
-        id: user.id,
-        fullname: user.fullname,
-        handle: user.handle,
-        email: user.email,
-        role: user.role,
+        profile: {
+            id: user.id,
+            fullname: user.fullname,
+            handle: user.handle,
+            role: user.role,
+        },
     };
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -80,7 +82,7 @@ const clearUserTokens = catchAsyncBusinessError(async function (refreshToken: st
 
     const user = await tokenDataService.validateRefreshToken(refreshToken);
 
-    await tokenDataService.deleteUserTokens(user.id);
+    await tokenDataService.deleteUserTokens(user.profile.id);
 
     return;
 });

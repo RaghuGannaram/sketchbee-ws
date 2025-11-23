@@ -1,35 +1,44 @@
 export enum Theme {
-	LIGHT = "light",
-	DARK = "dark",
-	SYSTEM = "system",
+    LIGHT = "light",
+    DARK = "dark",
+    SYSTEM = "system",
 }
 
 export interface IRegistration {
-	email: string;
-	username: string;
-	password: string;
+    email: string;
+    handle: string;
+    password: string;
 }
 
 export interface ILogin {
-	email: string;
-	password: string;
+    email: string;
+    password: string;
 }
 
 export interface ISettings {
-	autoplay?: boolean;
-	theme?: Theme;
+    theme?: Theme;
+}
+
+export interface IUser {
+    id: string;
+    fullname: string;
+    handle: string;
+    email: string;
+    password: string;
+    avatar: string;
+    background: string;
+    bio: string;
+    city: string;
+    from: string;
+    role: "user" | "moderator" | "admin";
+    friends: string[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IAuthUser {
-	id: string;
-	email: string;
-	username: string;
-	authProvider: string;
-	avatarUrl: string;
-	verified: boolean;
-	premium: boolean;
-	role: string;
-	settings: ISettings;
-	createdAt: string;
-	lastLoginAt?: string;
+    id: string;
+    fullname: string;
+    handle: string;
+    role: string;
 }
