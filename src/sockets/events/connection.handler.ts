@@ -9,6 +9,21 @@ export function handleConnection(socket: Socket, io: Server) {
 
     logger.debug("connection.handler: client connected %s", socket.id);
 
+    socket.on("greet", (data, cb) => {
+        try {
+            logger.debug("connection.handler: Greetings from %s : %o", socket.id, data);
+
+            cb({
+                greeting: `Hello ${socket.id}..!`,
+                serverTime: Date.now(),
+            });
+        } catch (err) {
+            logger.error("connection.handler: greet error %o", err);
+
+            cb({ error: "Failed to process greeting" });
+        }
+    });
+
     socket.on("online", (data) => {
         try {
             if (data?.chatId) socket.join(data.chatId);
