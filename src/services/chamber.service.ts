@@ -1,60 +1,142 @@
-type Player = { socketId: string; userId: string; name: string };
+import { ChamberStatus, type IChamber, type IPlayer } from "@src/types/chamber.types";
 
-type Room = {
-    players: Map<string, Player>;
-    drawerId: string | null;
-    word: string | null;
-    started: boolean;
-    createdAt: number;
+const CHAMBER_CONFIG = {
+    DEFAULT_MAX_PLAYERS: 8,
+    DEFAULT_ROUND_TIME: 60000,
 };
 
-const rooms = new Map<string, Room>();
-const MAX_PLAYERS_PER_ROOM = 10;
+const chambers = new Map<string, IChamber>();
 
-function findOrCreateRoom(): string {
-    for (const [roomId, room] of rooms.entries()) {
-        if (room.players.size < MAX_PLAYERS_PER_ROOM && !room.started) return roomId;
+function persistChamber(chamber: IChamber) {
+    chambers.set(chamber.chamberId, chamber);
+}
+
+function retrieveChamber(chamberId: string): IChamber | null {
+    return chambers.get(chamberId) || null;
+}
+
+function retrieveChambers(): IChamber[] {
+    return Array.from(chambers.values());
+}
+
+function disposeChamber(chamberId: string) {
+    chambers.delete(chamberId);
+}
+
+function allocateChamber(): string {
+    for (const chamber of retrieveChambers()) {
+        if (chamber.status === ChamberStatus.WAITING && chamber.players.length < chamber.config.maxPlayers) {
+            return chamber.chamberId;
+        }
     }
-    const id = `room_${Date.now()}_${Math.floor(Math.random() * 9000)}`;
-    rooms.set(id, { players: new Map(), drawerId: null, word: null, started: false, createdAt: Date.now() });
-    return id;
+    return provisionChamber();
 }
 
-function getRoom(roomId: string) {
-    return rooms.get(roomId) || null;
+function provisionChamber(): string {
+    const chamberId = `chamber_${Date.now().toString(36)}_${Math.floor(Math.random() * 1000)}`;
+
+    const newChamber: IChamber = {
+        chamberId,
+        players: [],
+        status: ChamberStatus.WAITING,
+        currentDrawerId: null,
+        currentWord: null,
+        currentHint: null,
+        wordChoices: [],
+        roundEndTime: 0,
+        strokeHistory: [],
+        createdAt: Date.now(),
+        config: {
+            maxPlayers: CHAMBER_CONFIG.DEFAULT_MAX_PLAYERS,
+            roundTimeMS: CHAMBER_CONFIG.DEFAULT_ROUND_TIME,
+            totalRounds: 3,
+        },
+    };
+
+    persistChamber(newChamber);
+    return chamberId;
 }
 
-function addPlayer(roomId: string, socketId: string, opts: { userId: string; name: string }) {
-    const room = rooms.get(roomId);
-    if (!room) return false;
-    room.players.set(socketId, { socketId, userId: opts.userId, name: opts.name });
-    return true;
+function registerPlayer(
+    chamberId: string,
+    profile: { playerId: string; socketId: string; handle: string; avatar?: string }
+): { ok: boolean; message?: string; player: IPlayer | null } {
+    const chamber = retrieveChamber(chamberId);
+
+    if (!chamber) {
+        return { ok: false, player: null, message: "chamber not found" };
+    }
+
+    const existingIndex = chamber.players.findIndex((p) => p.socketId === profile.socketId);
+
+    if (existingIndex === -1 && chamber.players.length >= chamber.config.maxPlayers) {
+        return { ok: false, player: null, message: "chamber is full" };
+    }
+
+    const existingData = existingIndex !== -1 ? chamber.players[existingIndex] : null;
+
+    const player: IPlayer = {
+        playerId: profile.playerId,
+        socketId: profile.socketId,
+        handle: profile.handle,
+        avatar: profile.avatar || "",
+        score: existingData ? existingData.score : 0,
+        isDrawer: false,
+        hasGuessedCorrectly: false,
+        scoreThisRound: 0,
+    };
+
+    if (existingIndex !== -1) {
+        chamber.players[existingIndex] = player;
+
+        return { ok: true, player, message: "player re-registered" };
+    } else {
+        chamber.players.push(player);
+
+        return { ok: true, player, message: "player registered" };
+    }
 }
 
-function removePlayer(roomId: string, socketId: string) {
-    const room = rooms.get(roomId);
-    if (!room) return false;
-    room.players.delete(socketId);
-    if (room.players.size === 0) rooms.delete(roomId);
-    return true;
+function deregisterPlayer(
+    chamberId: string,
+    socketId: string
+): { deregistered: boolean; chamberDisposed: boolean; player: IPlayer | null } {
+    const chamber = retrieveChamber(chamberId);
+
+    if (!chamber) {
+        return { deregistered: false, chamberDisposed: false, player: null };
+    }
+
+    const player = chamber.players.find((p) => p.socketId === socketId);
+
+    if (!player) {
+        return { deregistered: false, chamberDisposed: false, player: null };
+    }
+
+    chamber.players = chamber.players.filter((p) => p.socketId !== socketId);
+
+    if (chamber.players.length === 0) {
+        disposeChamber(chamberId);
+
+        return { deregistered: true, chamberDisposed: true, player };
+    }
+
+    return { deregistered: true, chamberDisposed: false, player };
 }
 
-function getPlayersList(roomId: string) {
-    const room = rooms.get(roomId);
-    if (!room) return [] as Player[];
-    return Array.from(room.players.values()).map((p) => ({ userId: p.userId, name: p.name, socketId: p.socketId }));
-}
+function retrievePlayers(chamberId: string): IPlayer[] {
+    const chamber = retrieveChamber(chamberId);
 
-function listRoomsSnapshot() {
-    return Array.from(rooms.entries()).map(([id, r]) => ({ id, players: r.players.size, createdAt: r.createdAt }));
+    if (!chamber) return [];
+
+    return Array.from(chamber.players.values());
 }
 
 export default {
-    findOrCreateRoom,
-    getRoom,
-    addPlayer,
-    removePlayer,
-    getPlayersList,
-    listRoomsSnapshot,
-    MAX_PLAYERS_PER_ROOM,
+    allocateChamber,
+    retrieveChamber,
+    retrieveChambers,
+    registerPlayer,
+    deregisterPlayer,
+    retrievePlayers,
 };
