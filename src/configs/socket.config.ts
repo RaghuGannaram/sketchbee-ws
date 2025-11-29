@@ -2,6 +2,7 @@ import http from "http";
 import { Server } from "socket.io";
 import envAccess from "./env.config";
 import logger from "@src/configs/logger.config";
+import socketService from "@src/services/socket.service";
 import registerSocketHandlers from "@src/sockets";
 
 function setupSocketIO(server: http.Server): void {
@@ -14,9 +15,10 @@ function setupSocketIO(server: http.Server): void {
         },
     });
 
-    logger.info("socket.config: socket.io initialized");
-
+    socketService.initIO(io);
     registerSocketHandlers(io);
+
+    logger.info("socket.config: socket.io initialized");
 }
 
 export default setupSocketIO;
