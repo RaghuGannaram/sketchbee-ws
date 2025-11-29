@@ -1,11 +1,14 @@
 import { Server, Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
-import { handleConnection } from "./events/connection.handler";
+import registerChamberHandlers from "./handlers/chamber.handler";
+// import registerGestureHandlers from "./handlers/gesture.handler";
 
 export default function registerSocketHandlers(io: Server) {
     io.on("connection", (socket: Socket) => {
-        logger.debug("sockets: new connection %s", socket.id);
-        
-        handleConnection(socket, io);
+        logger.debug("socket.handler: Connected new socket %s", socket.id);
+
+        registerChamberHandlers(socket);
+
+        // registerGestureHandlers(socket);
     });
 }
