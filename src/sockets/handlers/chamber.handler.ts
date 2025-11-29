@@ -51,7 +51,7 @@ export default function registerChamberHandlers(socket: Socket) {
                     return cb && cb({ ok: false, message: "chamber not found" });
                 }
 
-                if (targetChamber.players.size >= targetChamber.config.maxPlayers) {
+                if (targetChamber.players.length >= targetChamber.config.maxPlayers) {
                     return cb && cb({ ok: false, message: "chamber is full" });
                 }
 

@@ -1,9 +1,6 @@
 export enum ChamberStatus {
     WAITING = "WAITING",
-    SELECTING_WORD = "SELECTING_WORD",
     PLAYING = "PLAYING",
-    ROUND_OVER = "ROUND_OVER",
-    GAME_OVER = "GAME_OVER",
 }
 
 export interface IStroke {

@@ -25,7 +25,7 @@ function disposeChamber(chamberId: string) {
 
 function allocateChamber(): string {
     for (const chamber of retrieveChambers()) {
-        if (chamber.status === ChamberStatus.WAITING && chamber.players.length < chamber.config.maxPlayers) {
+        if (chamber.players.length < chamber.config.maxPlayers) {
             return chamber.chamberId;
         }
     }
