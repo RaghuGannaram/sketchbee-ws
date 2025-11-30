@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import userBusinessService from "@src/services/user.business";
 import catchAsyncError from "@src/middlewares/catch-async-error.middleware";
-import type { IVerifiedRequest, IUserUpdate, IUserFileUpdate, IController } from "@src/types";
+import type { IController, IVerifiedRequest } from "@src/types";
 import { HttpError, HttpErrors } from "@src/utils/application-errors";
 
 const getAllUsers: IController = catchAsyncError(async function (_req: Request, res: Response) {
@@ -27,7 +27,7 @@ const updateUserInfo: IController = catchAsyncError(async function (req: Request
     if ([fullname, bio, city, from].some((field) => field === undefined))
         throw new HttpError(400, HttpErrors.BAD_REQUEST, "fullname, bio, city, from are required.");
 
-    const updateData: IUserUpdate = {
+    const updateData: any = {
         fullname,
         bio,
         city,
@@ -44,12 +44,13 @@ const updateUserImage: IController = catchAsyncError(async (req: Request, res: R
     const { userId } = req.body;
 
     if (!userId) throw new HttpError(400, HttpErrors.BAD_REQUEST, "userId not provided.");
-    if (!req.body.type || !["avatar", "background"]) throw new HttpError(400, HttpErrors.BAD_REQUEST, "invalid type.");
+    if (!req.body.type || !["avatar", "background"].includes(req.body.type))
+        throw new HttpError(400, HttpErrors.BAD_REQUEST, "invalid type.");
     if (!req.file) throw new HttpError(400, HttpErrors.BAD_REQUEST, "file not provided.");
 
     const authUser = (req as IVerifiedRequest).user;
 
-    const updateData: IUserFileUpdate = {
+    const updateData: any = {
         type: req.body.type,
         file: req.file as Express.Multer.File,
     };

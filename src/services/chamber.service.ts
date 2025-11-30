@@ -1,13 +1,17 @@
-import { ChamberStatus, type IChamber, type IPlayer } from "@src/types/chamber.types";
+import { ChamberPhase, type IChamber, type ISeer } from "@src/types/chamber.types";
 
-const CHAMBER_CONFIG = {
-    DEFAULT_MAX_PLAYERS: 8,
-    DEFAULT_ROUND_TIME: 60000,
+const PRIMORDIAL_PACT = {
+    QUORUM: 2,
+    PLENUM: 8,
+    MAX_CYCLES: 5,
+    PROPHECY_DURATION_MS: 15000,
+    FLUX_DURATION_MS: 80000,
+    REVEAL_DURATION_MS: 8000,
 };
 
 const chambers = new Map<string, IChamber>();
 
-function persistChamber(chamber: IChamber) {
+function persistChamber(chamber: IChamber): void {
     chambers.set(chamber.chamberId, chamber);
 }
 
@@ -19,13 +23,13 @@ function retrieveChambers(): IChamber[] {
     return Array.from(chambers.values());
 }
 
-function disposeChamber(chamberId: string) {
+function disposeChamber(chamberId: string): void {
     chambers.delete(chamberId);
 }
 
 function allocateChamber(): string {
     for (const chamber of retrieveChambers()) {
-        if (chamber.players.length < chamber.config.maxPlayers) {
+        if (chamber.seers.length <= chamber.pact.plenum) {
             return chamber.chamberId;
         }
     }
@@ -37,106 +41,107 @@ function provisionChamber(): string {
 
     const newChamber: IChamber = {
         chamberId,
-        players: [],
-        status: ChamberStatus.WAITING,
-        currentDrawerId: null,
-        currentWord: null,
-        currentHint: null,
-        wordChoices: [],
-        roundEndTime: 0,
-        strokeHistory: [],
-        createdAt: Date.now(),
-        config: {
-            maxPlayers: CHAMBER_CONFIG.DEFAULT_MAX_PLAYERS,
-            roundTimeMS: CHAMBER_CONFIG.DEFAULT_ROUND_TIME,
-            totalRounds: 3,
+        seers: [],
+        phase: ChamberPhase.GATHERING,
+        casterId: null,
+        prophecies: [],
+        omen: null,
+        enigma: null,
+        sigilHistory: [],
+        pact: {
+            quorum: PRIMORDIAL_PACT.QUORUM,
+            plenum: PRIMORDIAL_PACT.PLENUM,
+            maxCycles: PRIMORDIAL_PACT.MAX_CYCLES,
+            prophecyDurationMS: PRIMORDIAL_PACT.PROPHECY_DURATION_MS,
+            fluxDurationMS: PRIMORDIAL_PACT.FLUX_DURATION_MS,
+            revealDurationMS: PRIMORDIAL_PACT.REVEAL_DURATION_MS,
         },
+        manifestedAt: Date.now(),
     };
 
     persistChamber(newChamber);
     return chamberId;
 }
 
-function registerPlayer(
+function registerSeer(
     chamberId: string,
-    profile: { playerId: string; socketId: string; handle: string; avatar?: string }
-): { ok: boolean; message?: string; player: IPlayer | null } {
+    profile: { seerId: string; socketId: string; epithet: string; guise?: string }
+): { ok: boolean; message?: string; seer: ISeer | null } {
     const chamber = retrieveChamber(chamberId);
 
     if (!chamber) {
-        return { ok: false, player: null, message: "chamber not found" };
+        return { ok: false, seer: null, message: "chamber not found" };
     }
 
-    const existingIndex = chamber.players.findIndex((p) => p.socketId === profile.socketId);
+    const existingIndex = chamber.seers.findIndex((p) => p.socketId === profile.socketId);
 
-    if (existingIndex === -1 && chamber.players.length >= chamber.config.maxPlayers) {
-        return { ok: false, player: null, message: "chamber is full" };
+    if (existingIndex === -1 && chamber.seers.length >= chamber.pact.plenum) {
+        return { ok: false, seer: null, message: "chamber is full" };
     }
 
-    const existingData = existingIndex !== -1 ? chamber.players[existingIndex] : null;
+    const existingData = existingIndex !== -1 ? chamber.seers[existingIndex] : null;
 
-    const player: IPlayer = {
-        playerId: profile.playerId,
+    const seer: ISeer = {
+        seerId: profile.seerId,
         socketId: profile.socketId,
-        handle: profile.handle,
-        avatar: profile.avatar || "",
-        score: existingData ? existingData.score : 0,
-        isDrawer: false,
-        hasGuessedCorrectly: false,
-        scoreThisRound: 0,
+        epithet: profile.epithet,
+        guise: profile.guise || "",
+        essence: existingData ? existingData.essence : 0,
+        isCaster: false,
+        hasUnveiled: false,
+        currentEssence: 0,
     };
 
     if (existingIndex !== -1) {
-        chamber.players[existingIndex] = player;
+        chamber.seers[existingIndex] = seer;
 
-        return { ok: true, player, message: "player re-registered" };
+        return { ok: true, seer, message: "seer re-registered" };
     } else {
-        chamber.players.push(player);
+        chamber.seers.push(seer);
 
-        return { ok: true, player, message: "player registered" };
+        return { ok: true, seer, message: "seer registered" };
     }
 }
 
-function deregisterPlayer(
+function deregisterSeer(
     chamberId: string,
     socketId: string
-): { deregistered: boolean; chamberDisposed: boolean; player: IPlayer | null } {
+): { deregistered: boolean; chamberDisposed: boolean; seer: ISeer | null } {
     const chamber = retrieveChamber(chamberId);
 
     if (!chamber) {
-        return { deregistered: false, chamberDisposed: false, player: null };
+        return { deregistered: false, chamberDisposed: false, seer: null };
     }
 
-    const player = chamber.players.find((p) => p.socketId === socketId);
+    const seer = chamber.seers.find((p) => p.socketId === socketId);
 
-    if (!player) {
-        return { deregistered: false, chamberDisposed: false, player: null };
+    if (!seer) {
+        return { deregistered: false, chamberDisposed: false, seer: null };
     }
 
-    chamber.players = chamber.players.filter((p) => p.socketId !== socketId);
-
-    if (chamber.players.length === 0) {
+    chamber.seers = chamber.seers.filter((p) => p.socketId !== socketId);
+    if (chamber.seers.length === 0) {
         disposeChamber(chamberId);
 
-        return { deregistered: true, chamberDisposed: true, player };
+        return { deregistered: true, chamberDisposed: true, seer };
     }
 
-    return { deregistered: true, chamberDisposed: false, player };
+    return { deregistered: true, chamberDisposed: false, seer };
 }
 
-function retrievePlayers(chamberId: string): IPlayer[] {
+function retrieveSeers(chamberId: string): ISeer[] {
     const chamber = retrieveChamber(chamberId);
 
     if (!chamber) return [];
 
-    return Array.from(chamber.players.values());
+    return Array.from(chamber.seers.values());
 }
 
 export default {
     allocateChamber,
     retrieveChamber,
     retrieveChambers,
-    registerPlayer,
-    deregisterPlayer,
-    retrievePlayers,
+    registerSeer,
+    deregisterSeer,
+    retrieveSeers,
 };

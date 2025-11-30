@@ -1,33 +1,33 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-export interface GestureDocument extends Document {
+export interface RuneDocument extends Document {
     id: string;
     chamber: Types.ObjectId;
-    sender: Types.ObjectId;
-    content: string;
+    caster: Types.ObjectId;
+    rune: string;
     createdAt: Date;
     updatedAt: Date;
 }
 
-const gestureSchema = new Schema<GestureDocument>(
+const runeSchema = new Schema<RuneDocument>(
     {
         chamber: {
             type: Schema.Types.ObjectId,
             ref: "Chamber",
             required: true,
         },
-        sender: {
+        caster: {
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-        content: {
+        rune: {
             type: String,
             required: true,
         },
     },
     {
-        collection: "gestureCollection",
+        collection: "runeCollection",
         autoIndex: true,
         optimisticConcurrency: true,
         bufferTimeoutMS: 10000,
@@ -55,6 +55,6 @@ const gestureSchema = new Schema<GestureDocument>(
     }
 );
 
-const GestureModel = model<GestureDocument>("Gesture", gestureSchema);
+const RuneModel = model<RuneDocument>("Rune", runeSchema);
 
-export default GestureModel;
+export default RuneModel;

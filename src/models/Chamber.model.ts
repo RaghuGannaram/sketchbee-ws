@@ -3,7 +3,7 @@ import { Schema, model, Document, Types } from "mongoose";
 export interface ChamberDocument extends Document {
     id: string;
     name: string;
-    participants: Types.ObjectId[];
+    players: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -14,7 +14,7 @@ const chamberSchema = new Schema<ChamberDocument>(
             type: String,
             default: "",
         },
-        participants: [
+        players: [
             {
                 type: Schema.Types.ObjectId,
                 ref: "User",

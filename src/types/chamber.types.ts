@@ -1,44 +1,48 @@
-export enum ChamberStatus {
-    WAITING = "WAITING",
-    PLAYING = "PLAYING",
+import type { ISigil } from "./rune.types";
+
+export enum ChamberPhase {
+    GATHERING = "GATHERING",
+    INVOKING = "INVOKING",
+    MANIFESTING = "MANIFESTING",
+    REVEALING = "REVEALING",
+    SEALED = "SEALED",
 }
 
-export interface IStroke {
-    color: string;
-    width: number;
-    points: { x: number; y: number }[];
-}
-
-export interface IPlayer {
-    playerId: string;
+export interface ISeer {
+    seerId: string;
     socketId: string;
-    handle: string;
-    avatar: string;
-    score: number;
 
-    isDrawer: boolean;
-    hasGuessedCorrectly: boolean;
-    scoreThisRound: number;
+    epithet: string;
+    guise: string;
+
+    essence: number;
+
+    isCaster: boolean;
+    hasUnveiled: boolean;
+    currentEssence: number;
 }
 
 export interface IChamber {
     chamberId: string;
-    players: IPlayer[];
-    status: ChamberStatus;
+    seers: ISeer[];
+    phase: ChamberPhase;
 
-    currentDrawerId: string | null;
-    currentWord: string | null; // Secret: "Apple"
-    currentHint: string | null; // Public: "_ _ _ _ _"
-    wordChoices: string[]; // Words offered to drawer
+    casterId: string | null;
+    prophecies: string[];
+    omen: string | null;
+    enigma: string | null;
 
-    roundEndTime: number;
-    strokeHistory: IStroke[];
+    sigilHistory: ISigil[];
 
-    config: {
-        maxPlayers: number;
-        roundTimeMS: number;
-        totalRounds: number;
+    pact: {
+        quorum: number;
+        plenum: number;
+        maxCycles: number;
+
+        prophecyDurationMS: number;
+        fluxDurationMS: number;
+        revealDurationMS: number;
     };
 
-    createdAt: number;
+    manifestedAt: number;
 }

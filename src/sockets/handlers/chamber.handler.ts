@@ -18,32 +18,12 @@ const socketAsync = (handler: Function) => {
     };
 };
 
-export default function registerChamberHandlers(socket: Socket) {
-    socket.on(
-        "sys:greet",
-        socketAsync((data: any, cb: Function) => {
-            logger.debug("chamber.handler: %s greets, %s", socket.id, data?.greeting);
-
-            if (cb) cb({ ok: true, greeting: `Hello ${socket.id}`, serverTime: Date.now() });
-        })
-    );
-
-    socket.on(
-        "sys:online",
-        socketAsync((data: any, cb: Function) => {
-            logger.debug("chamber.handler: %s is online with data: %o", socket.id, data);
-
-            if (cb) cb({ ok: true, serverTime: Date.now() });
-        })
-    );
-
+export default function registerChamberHandler(socket: Socket) {
     socket.on(
         "chamber:join",
         socketAsync(
-            (
-                { chamberId, playerId, handle }: { chamberId: string; playerId: string; handle: string },
-                cb: Function
-            ) => {
+            (data: { chamberId: string; seerId: string; epithet: string }, cb: Function) => {
+                const { chamberId, seerId, epithet } = data;
                 const targetChamberId = chamberId || chamberService.allocateChamber();
                 const targetChamber = chamberService.retrieveChamber(targetChamberId);
 
@@ -51,16 +31,16 @@ export default function registerChamberHandlers(socket: Socket) {
                     return cb && cb({ ok: false, message: "chamber not found" });
                 }
 
-                if (targetChamber.players.length >= targetChamber.config.maxPlayers) {
+                if (targetChamber.seers.length >= targetChamber.pact.plenum) {
                     return cb && cb({ ok: false, message: "chamber is full" });
                 }
 
                 socket.join(targetChamberId);
 
-                const registered = chamberService.registerPlayer(targetChamberId, {
-                    playerId: playerId || `player_${socket.id}`,
+                const registered = chamberService.registerSeer(targetChamberId, {
+                    seerId: seerId || `seer_${socket.id}`,
                     socketId: socket.id,
-                    handle: handle || "Anon",
+                    epithet: epithet || "Anon",
                 });
 
                 if (!registered.ok) {
@@ -69,18 +49,13 @@ export default function registerChamberHandlers(socket: Socket) {
 
                 socketService.emitToChamber(targetChamberId, "chamber:sync", {
                     chamberId: targetChamberId,
-                    players: chamberService.retrievePlayers(targetChamberId),
+                    seers: chamberService.retrieveSeers(targetChamberId),
                 });
 
-                logger.info(
-                    "chamber.handler: player %s joined chamber %s",
-                    registered.player?.socketId,
-                    targetChamberId
-                );
+                logger.info("chamber.handler: player %s joined chamber %s", registered.seer?.socketId, targetChamberId);
 
                 return (
-                    cb &&
-                    cb({ ok: true, message: "joined chamber", chamberId: targetChamberId, player: registered.player })
+                    cb && cb({ ok: true, message: "joined chamber", chamberId: targetChamberId, seer: registered.seer })
                 );
             }
         )
@@ -88,8 +63,9 @@ export default function registerChamberHandlers(socket: Socket) {
 
     socket.on(
         "chamber:leave",
-        socketAsync(({ chamberId }: { chamberId: string }, cb: Function) => {
-            const { deregistered, chamberDisposed, player } = chamberService.deregisterPlayer(chamberId, socket.id);
+        socketAsync((data: { chamberId: string }, cb: Function) => {
+            const { chamberId } = data;
+            const { deregistered, chamberDisposed, seer } = chamberService.deregisterSeer(chamberId, socket.id);
 
             if (!deregistered) {
                 return cb && cb({ ok: false, message: "failed to leave chamber" });
@@ -99,11 +75,11 @@ export default function registerChamberHandlers(socket: Socket) {
 
             socketService.emitToChamber(chamberId, "chamber:sync", {
                 chamberId,
-                players: chamberService.retrievePlayers(chamberId),
+                seers: chamberService.retrieveSeers(chamberId),
             });
 
             if (chamberDisposed) {
-                logger.info("chamber.handler: last player %s left, disposed chamber %s", player?.socketId, chamberId);
+                logger.info("chamber.handler: last player %s left, disposed chamber %s", seer?.socketId, chamberId);
             } else {
                 logger.info("chamber.handler: player %s left from chamber %s", socket.id, chamberId);
             }
@@ -120,18 +96,18 @@ export default function registerChamberHandlers(socket: Socket) {
             for (const chamberId of joinedChambers) {
                 logger.info(`chamber.handler: cleanup for socket ${socket.id} in chamber ${chamberId}`);
 
-                const { deregistered, chamberDisposed, player } = chamberService.deregisterPlayer(chamberId, socket.id);
+                const { deregistered, chamberDisposed, seer } = chamberService.deregisterSeer(chamberId, socket.id);
 
                 if (deregistered && !chamberDisposed) {
                     socketService.emitToChamber(chamberId, "chamber:sync", {
                         chamberId,
-                        players: chamberService.retrievePlayers(chamberId),
+                        seers: chamberService.retrieveSeers(chamberId),
                     });
 
                     socketService.emitToChamber(chamberId, "sys:message", {
-                        text: player?.isDrawer
-                            ? `${player?.handle} (drawer) has disconnected.`
-                            : `${player?.handle} has disconnected.`,
+                        text: seer?.isCaster
+                            ? `${seer?.epithet} (caster) has disconnected.`
+                            : `${seer?.epithet} has disconnected.`,
                     });
                 }
             }
