@@ -42,10 +42,10 @@ export default function registerRuneHandler(socket: Socket) {
 
     socket.on(
         "rune:script",
-        socketAsync((data: { chamberId: string; seerId: string; epithet: string; script: string }, cb: Function) => {
-            const { chamberId, seerId, epithet, script } = data;
+        socketAsync((data: { chamberId: string; epithet: string; script: string }, cb: Function) => {
+            const { chamberId, epithet, script } = data;
 
-            if (!chamberId || !seerId || !epithet || !script) {
+            if (!chamberId || !epithet || !script) {
                 return cb && cb({ ok: false, message: "invalid parameters" });
             }
 
@@ -53,12 +53,12 @@ export default function registerRuneHandler(socket: Socket) {
             const runeUnvailed = false;
 
             if (runeUnvailed) {
-                socketService.emitToChamber(chamberId, "rune:unvailed", { seerId, epithet });
+                socketService.emitToChamber(chamberId, "rune:unvailed", { epithet });
             } else {
                 socketService.emitToChamber(chamberId, "rune:script", {
-                    seerId,
                     epithet,
                     script,
+                    isSystem: false,
                     timestamp: Date.now(),
                 });
             }
