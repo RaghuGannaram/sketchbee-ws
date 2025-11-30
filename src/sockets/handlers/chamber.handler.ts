@@ -22,8 +22,8 @@ export default function registerChamberHandler(socket: Socket) {
     socket.on(
         "chamber:join",
         socketAsync(
-            (data: { chamberId: string; seerId: string; epithet: string }, cb: Function) => {
-                const { chamberId, seerId, epithet } = data;
+            (data: { chamberId: string; seerId: string; epithet: string, guise: string }, cb: Function) => {
+                const { chamberId, seerId, epithet, guise } = data;
                 const targetChamberId = chamberId || chamberService.allocateChamber();
                 const targetChamber = chamberService.retrieveChamber(targetChamberId);
 
@@ -41,6 +41,7 @@ export default function registerChamberHandler(socket: Socket) {
                     seerId: seerId || `seer_${socket.id}`,
                     socketId: socket.id,
                     epithet: epithet || "Anon",
+                    guise: guise || `https://api.dicebear.com/7.x/notionists/svg?seed=${epithet || "Anon"}`,
                 });
 
                 if (!registered.ok) {
