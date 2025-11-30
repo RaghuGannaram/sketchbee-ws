@@ -1,5 +1,7 @@
 export interface ISigil {
-    color: string;
-    width: number;
-    points: { x: number; y: number }[];
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+    tip: "etch" | "rub";
+    gauge: number;
+    pigment: string;
 }
