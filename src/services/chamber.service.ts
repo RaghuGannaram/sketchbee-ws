@@ -27,6 +27,33 @@ function disposeChamber(chamberId: string): void {
     chambers.delete(chamberId);
 }
 
+function generateChamberId(topic: string = "chamber"): string {
+    const cleanName =
+        topic
+            .replace(/[^a-zA-Z0-9]/g, "")
+            .toLowerCase()
+            .slice(0, 10) || "chamber";
+
+    const timestamp = Date.now().toString(36);
+
+    const random = Math.random().toString(36).substring(2, 7);
+
+    return `${cleanName}_${timestamp}_${random}`;
+}
+
+function generateSeerId(epithet: string): string {
+    const cleanName =
+        epithet
+            .replace(/[^a-zA-Z0-9]/g, "")
+            .toLowerCase()
+            .slice(0, 10) || "seer";
+
+    const timestamp = Date.now().toString(36);
+
+    const random = Math.random().toString(36).substring(2, 7);
+    return `${cleanName}_${timestamp}_${random}`;
+}
+
 function allocateChamber(): string {
     for (const chamber of retrieveChambers()) {
         if (chamber.seers.length <= chamber.pact.plenum) {
@@ -37,7 +64,7 @@ function allocateChamber(): string {
 }
 
 function provisionChamber(): string {
-    const chamberId = `chamber_${Date.now().toString(36)}_${Math.floor(Math.random() * 1000)}`;
+    const chamberId = generateChamberId();
 
     const newChamber: IChamber = {
         chamberId,
@@ -65,47 +92,59 @@ function provisionChamber(): string {
 
 function registerSeer(
     chamberId: string,
-    profile: { seerId: string; socketId: string; epithet: string; guise?: string }
-): { ok: boolean; message?: string; seer: ISeer | null } {
+    profile: { seerId: string; socketId: string; epithet: string; guise: string }
+): { ok: boolean; message: string; seer: ISeer | null } {
     const chamber = retrieveChamber(chamberId);
 
     if (!chamber) {
-        return { ok: false, seer: null, message: "chamber not found" };
+        return { ok: false, message: "chamber not found", seer: null };
     }
 
-    const existingIndex = chamber.seers.findIndex((p) => p.socketId === profile.socketId);
+    const existingIndex = chamber.seers.findIndex((seer) => seer.seerId === profile.seerId);
 
-    if (existingIndex === -1 && chamber.seers.length >= chamber.pact.plenum) {
-        return { ok: false, seer: null, message: "chamber is full" };
+    if (existingIndex !== -1 && chamber.seers[existingIndex]) {
+        const existingSeer = chamber.seers[existingIndex];
+
+        existingSeer.socketId = profile.socketId;
+        existingSeer.epithet = profile.epithet;
+        existingSeer.guise = profile.guise;
+
+        chamber.seers[existingIndex] = existingSeer;
+
+        return { ok: true, message: "seer re-connected", seer: existingSeer };
     }
 
-    const existingData = existingIndex !== -1 ? chamber.seers[existingIndex] : null;
+    if (chamber.seers.length >= chamber.pact.plenum) {
+        return { ok: false, message: "chamber is full", seer: null };
+    }
 
     const seer: ISeer = {
         seerId: profile.seerId,
         socketId: profile.socketId,
+        chamberId: chamberId,
         epithet: profile.epithet,
-        guise: profile.guise || "",
-        essence: existingData ? existingData.essence : 0,
+        guise: profile.guise,
+        essence: 0,
         isCaster: false,
         hasUnveiled: false,
         currentEssence: 0,
     };
 
-    if (existingIndex !== -1) {
-        chamber.seers[existingIndex] = seer;
+    const hasExistingCaster = chamber.seers.some((s) => s.isCaster);
+    const hasReachedQuorum = chamber.seers.length + 1 >= chamber.pact.quorum;
 
-        return { ok: true, seer, message: "seer re-registered" };
-    } else {
-        chamber.seers.push(seer);
-
-        return { ok: true, seer, message: "seer registered" };
+    if (!hasExistingCaster && hasReachedQuorum) {
+        seer.isCaster = true;
     }
+
+    chamber.seers.push(seer);
+
+    return { ok: true, message: "seer registered", seer };
 }
 
 function deregisterSeer(
     chamberId: string,
-    socketId: string
+    seerId: string
 ): { deregistered: boolean; chamberDisposed: boolean; seer: ISeer | null } {
     const chamber = retrieveChamber(chamberId);
 
@@ -113,13 +152,14 @@ function deregisterSeer(
         return { deregistered: false, chamberDisposed: false, seer: null };
     }
 
-    const seer = chamber.seers.find((p) => p.socketId === socketId);
+    const seer = chamber.seers.find((seer) => seer.seerId === seerId);
 
     if (!seer) {
         return { deregistered: false, chamberDisposed: false, seer: null };
     }
 
-    chamber.seers = chamber.seers.filter((p) => p.socketId !== socketId);
+    chamber.seers = chamber.seers.filter((seer) => seer.seerId !== seerId);
+
     if (chamber.seers.length === 0) {
         disposeChamber(chamberId);
 
@@ -141,6 +181,7 @@ export default {
     allocateChamber,
     retrieveChamber,
     retrieveChambers,
+    generateSeerId,
     registerSeer,
     deregisterSeer,
     retrieveSeers,

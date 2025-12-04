@@ -11,6 +11,7 @@ export enum ChamberPhase {
 export interface ISeer {
     seerId: string;
     socketId: string;
+    chamberId?: string;
 
     epithet: string;
     guise: string;
