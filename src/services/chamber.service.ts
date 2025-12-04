@@ -134,6 +134,7 @@ function registerSeer(
     const hasReachedQuorum = chamber.seers.length + 1 >= chamber.pact.quorum;
 
     if (!hasExistingCaster && hasReachedQuorum) {
+        chamber.casterId = seer.seerId;
         seer.isCaster = true;
     }
 

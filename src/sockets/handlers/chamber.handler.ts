@@ -24,6 +24,10 @@ export default function registerChamberHandler(socket: Socket) {
         socketAsync((data: { epithet: string; guise: string; chamberId?: string; seerId?: string }, cb: Function) => {
             let { chamberId, seerId, epithet, guise } = data;
 
+            if (!epithet || !guise) {
+                return cb && cb({ ok: false, message: "epithet and guise are required to join chamber" });
+            }
+
             if (!chamberId) {
                 logger.info("chamber.handler: allocating new chamberId for socket %s", socket.id);
                 chamberId = chamberService.allocateChamber();
@@ -31,7 +35,8 @@ export default function registerChamberHandler(socket: Socket) {
 
             if (!seerId) {
                 logger.info("chamber.handler: allocating new seerId for socket %s", socket.id);
-                seerId = chamberService.generateSeerId(epithet);
+                // seerId = chamberService.generateSeerId(epithet);
+                seerId = `${epithet}_${socket.id}`;
             }
 
             const registered = chamberService.registerSeer(chamberId, {
