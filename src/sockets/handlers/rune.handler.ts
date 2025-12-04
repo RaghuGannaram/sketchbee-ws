@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
 import socketService from "@src/services/socket.service";
 import type { ISigil } from "@src/types/rune.types";
+import chamberService from "@src/services/chamber.service";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {
@@ -50,6 +51,16 @@ export default function registerRuneHandler(socket: Socket) {
             if (!chamberId || !casterId || !vision) {
                 return cb && cb({ ok: false, message: "invalid parameters" });
             }
+
+            const chamber = chamberService.retrieveChamber(chamberId);
+            if (!chamber) {
+                return cb && cb({ ok: false, message: "chamber not found" });
+            }
+
+            if (casterId !== chamber.casterId) {
+                return cb && cb({ ok: false, message: "only the caster can shift the vellum" });
+            }
+
             socketService.broadcastToChamberExcept(chamberId, casterId, "rune:shift", {
                 chamberId,
                 casterId,
@@ -64,8 +75,18 @@ export default function registerRuneHandler(socket: Socket) {
         "rune:void",
         socketAsync((data: { chamberId: string; casterId: string }, cb: Function) => {
             const { chamberId, casterId } = data;
+
             if (!chamberId || !casterId) {
                 return cb && cb({ ok: false, message: "invalid parameters" });
+            }
+
+            const chamber = chamberService.retrieveChamber(chamberId);
+            if (!chamber) {
+                return cb && cb({ ok: false, message: "chamber not found" });
+            }
+
+            if (casterId !== chamber.casterId) {
+                return cb && cb({ ok: false, message: "only the caster can clear the vellum" });
             }
 
             socketService.broadcastToChamberExcept(chamberId, casterId, "rune:void", {
