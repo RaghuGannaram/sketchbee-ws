@@ -1,25 +1,17 @@
 import chamberService from "./chamber.service";
-import { ChamberPhase } from "@src/types/chamber.types";
+import { summonProphecies } from "@src/game/prophecies";
+import { RitualPhase } from "@src/types/ritual.types";
 
-const ARCANE_BANK = ["Dragon", "Potion", "Wizard", "Crystal", "Scroll", "Chalice", "Phoenix", "Grimoire"];
-
-/**
- * Result of a Seer attempting to read the Enigma
- */
 interface DecipherResult {
     outcome: "UNVEILED" | "CLOSE" | "DISCORD" | "ALREADY_UNVEILED";
     essenceGained: number;
     message: string;
 }
 
-/**
- * Phase 1: Select a Caster and offer Prophecies
- * (Formerly: startRitual)
- */
-function prepareRitualCycle(chamberId: string): boolean {
+function prepareRitual(chamberId: string): { ok: boolean; message: string } {
     const chamber = chamberService.retrieveChamber(chamberId);
 
-    if (!chamber || chamber.seers.length < 2) return false;
+    if (!chamber) return { ok: false, message: "chamber not found" };
 
     const randomCasterIndex = Math.floor(Math.random() * chamber.seers.length);
     const newCasterId = chamber.seers[randomCasterIndex]!.seerId;
@@ -31,43 +23,48 @@ function prepareRitualCycle(chamberId: string): boolean {
     });
 
     chamber.casterId = newCasterId;
-    chamber.prophecies = [
-        ARCANE_BANK[Math.floor(Math.random() * ARCANE_BANK.length)] ?? "Void",
-        ARCANE_BANK[Math.floor(Math.random() * ARCANE_BANK.length)] ?? "Abyss",
-        ARCANE_BANK[Math.floor(Math.random() * ARCANE_BANK.length)] ?? "Shadow",
-    ];
+    chamber.prophecies = summonProphecies();
     chamber.omen = null;
     chamber.enigma = null;
     chamber.sigilHistory = [];
+    chamber.phase = RitualPhase.DIVINATION;
 
-    chamber.phase = ChamberPhase.INVOKING;
-
-    return true;
+    return { ok: true, message: "ritual prepared" };
 }
 
-function manifestEnigma(chamberId: string, prophecy: string): boolean {
+function manifestEnigma(
+    chamberId: string,
+    casterId: string,
+    prophecy: string
+): { ok: boolean; message: string; omen: string | null } {
     const chamber = chamberService.retrieveChamber(chamberId);
 
-    if (!chamber) return false;
+    if (!chamber) {
+        return { ok: false, message: "chamber not found", omen: null };
+    }
 
-    chamber.enigma = prophecy;
+    if (chamber.casterId !== casterId) {
+        return { ok: false, message: "only the caster can manifest the enigma", omen: null };
+    }
 
-    chamber.omen = prophecy
+    const omen = prophecy
         .split("")
         .map((char) => (char === " " ? " " : "_"))
         .join(" ");
 
+    chamber.enigma = prophecy;
+    chamber.omen = omen;
     chamber.prophecies = [];
-    chamber.phase = ChamberPhase.MANIFESTING;
+    chamber.phase = RitualPhase.MANIFESTATION;
 
-    return true;
+    return { ok: true, message: "enigma manifested", omen: omen };
 }
 
 function attemptDecipher(chamberId: string, seerId: string, script: string): DecipherResult {
     const chamber = chamberService.retrieveChamber(chamberId);
 
     // Validation: Ritual must be active and Enigma must exist
-    if (!chamber || !chamber.enigma || chamber.phase !== ChamberPhase.MANIFESTING) {
+    if (!chamber || !chamber.enigma || chamber.phase !== RitualPhase.MANIFESTING) {
         return { outcome: "DISCORD", essenceGained: 0, message: script };
     }
 
@@ -144,7 +141,7 @@ function perceiveRitual(chamberId: string, requestingSeerId: string) {
 }
 
 export default {
-    prepareRitualCycle,
+    prepareRitual,
     manifestEnigma,
     attemptDecipher,
     perceiveRitual,

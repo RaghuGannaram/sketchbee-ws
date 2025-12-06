@@ -1,12 +1,5 @@
 import type { ISigil } from "./rune.types";
-
-export enum ChamberPhase {
-    GATHERING = "GATHERING",
-    INVOKING = "INVOKING",
-    MANIFESTING = "MANIFESTING",
-    REVEALING = "REVEALING",
-    SEALED = "SEALED",
-}
+import { RitualPhase } from "./ritual.types";
 
 export interface ISeer {
     seerId: string;
@@ -26,7 +19,7 @@ export interface ISeer {
 export interface IChamber {
     chamberId: string;
     seers: ISeer[];
-    phase: ChamberPhase;
+    phase: RitualPhase;
 
     casterId: string | null;
     prophecies: string[];

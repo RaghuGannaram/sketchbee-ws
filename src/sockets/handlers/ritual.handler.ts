@@ -27,9 +27,10 @@ export default function registerRitualHandler(socket: Socket) {
                 return cb && cb({ ok: false, message: "invalid chamberId" });
             }
 
-            const ritualPrepared = ritualService.prepareRitualCycle(chamberId);
-            if (!ritualPrepared) {
-                return cb && cb({ ok: false, message: "failed to prepare ritual" });
+            const prepared = ritualService.prepareRitual(chamberId);
+
+            if (!prepared.ok) {
+                return cb && cb({ ok: false, message: prepared.message });
             }
 
             const chamber = chamberService.retrieveChamber(chamberId);
@@ -39,7 +40,10 @@ export default function registerRitualHandler(socket: Socket) {
             }
 
             socketService.emitToChamber(chamberId, "ritual:prepared", { casterId: chamber.casterId });
-            socketService.emitToSocket(chamber.casterId, "ritual:prophecies", { prophecies: chamber.prophecies });
+            socketService.emitToSocket(chamber.casterId, "ritual:prophecies", {
+                casterId: chamber.casterId,
+                prophecies: chamber.prophecies,
+            });
 
             return cb && cb({ ok: true, message: "ritual prepared" });
         })
@@ -47,22 +51,26 @@ export default function registerRitualHandler(socket: Socket) {
 
     socket.on(
         "ritual:prophecy",
-        socketAsync(({ chamberId, prophecy }: { chamberId: string; prophecy: string }, cb: Function) => {
-            if (!chamberId || !prophecy) {
-                return cb && cb({ ok: false, message: "invalid parameters" });
+        socketAsync(
+            (
+                { chamberId, casterId, prophecy }: { chamberId: string; casterId: string; prophecy: string },
+                cb: Function
+            ) => {
+                if (!chamberId || !casterId || !prophecy) {
+                    return cb && cb({ ok: false, message: "invalid parameters" });
+                }
+
+                const manifested = ritualService.manifestEnigma(chamberId, casterId, prophecy);
+
+                if (!manifested.ok) {
+                    return cb && cb({ ok: false, message: "failed to manifest enigma" });
+                }
+
+                socketService.emitToChamber(chamberId, "ritual:started", {
+                    casterId: casterId,
+                    omen: manifested.omen,
+                });
             }
-
-            const enigmaManifested = ritualService.manifestEnigma(chamberId, prophecy);
-
-            if (!enigmaManifested) {
-                return cb && cb({ ok: false, message: "failed to manifest enigma" });
-            }
-
-            socketService.emitToChamber(chamberId, "ritual:started", {
-                casterId: socket.id,
-                prophecyLength: prophecy.length,
-                omen: "_ _ _ _",
-            });
-        })
+        )
     );
 }

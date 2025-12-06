@@ -1,4 +1,5 @@
-import { ChamberPhase, type IChamber, type ISeer } from "@src/types/chamber.types";
+import { type IChamber, type ISeer } from "@src/types/chamber.types";
+import { RitualPhase } from "@src/types/ritual.types";
 
 const PRIMORDIAL_PACT = {
     QUORUM: 2,
@@ -69,7 +70,7 @@ function provisionChamber(): string {
     const newChamber: IChamber = {
         chamberId,
         seers: [],
-        phase: ChamberPhase.GATHERING,
+        phase: RitualPhase.CONGREGATION,
         casterId: null,
         prophecies: [],
         omen: null,
@@ -93,11 +94,11 @@ function provisionChamber(): string {
 function registerSeer(
     chamberId: string,
     profile: { seerId: string; socketId: string; epithet: string; guise: string }
-): { ok: boolean; message: string; seer: ISeer | null } {
+): { ok: boolean; message: string; seer: ISeer | null; hasReachedQuorum: boolean } {
     const chamber = retrieveChamber(chamberId);
 
     if (!chamber) {
-        return { ok: false, message: "chamber not found", seer: null };
+        return { ok: false, message: "chamber not found", seer: null, hasReachedQuorum: false };
     }
 
     const existingIndex = chamber.seers.findIndex((seer) => seer.seerId === profile.seerId);
@@ -111,11 +112,11 @@ function registerSeer(
 
         chamber.seers[existingIndex] = existingSeer;
 
-        return { ok: true, message: "seer re-connected", seer: existingSeer };
+        return { ok: true, message: "seer re-connected", seer: existingSeer, hasReachedQuorum: false };
     }
 
     if (chamber.seers.length >= chamber.pact.plenum) {
-        return { ok: false, message: "chamber is full", seer: null };
+        return { ok: false, message: "chamber is full", seer: null, hasReachedQuorum: false };
     }
 
     const seer: ISeer = {
@@ -130,17 +131,11 @@ function registerSeer(
         currentEssence: 0,
     };
 
-    const hasExistingCaster = chamber.seers.some((s) => s.isCaster);
-    const hasReachedQuorum = chamber.seers.length + 1 >= chamber.pact.quorum;
-
-    if (!hasExistingCaster && hasReachedQuorum) {
-        chamber.casterId = seer.seerId;
-        seer.isCaster = true;
-    }
-
     chamber.seers.push(seer);
 
-    return { ok: true, message: "seer registered", seer };
+    const hasReachedQuorum = chamber.seers.length >= chamber.pact.quorum;
+
+    return { ok: true, message: "seer registered", seer, hasReachedQuorum };
 }
 
 function deregisterSeer(
