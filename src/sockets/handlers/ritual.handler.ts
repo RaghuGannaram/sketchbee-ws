@@ -40,7 +40,7 @@ export default function registerRitualHandler(socket: Socket) {
             }
 
             socketService.emitToChamber(chamberId, "ritual:prepared", { casterId: chamber.casterId });
-            socketService.emitToSocket(chamber.casterId, "ritual:prophecies", {
+            socketService.emitToSocket(prepared.caster!.socketId, "ritual:prophecies", {
                 casterId: chamber.casterId,
                 prophecies: chamber.prophecies,
             });
@@ -70,6 +70,9 @@ export default function registerRitualHandler(socket: Socket) {
                     casterId: casterId,
                     omen: manifested.omen,
                 });
+
+
+                return cb && cb({ ok: true, message: "enigma manifested" });
             }
         )
     );

@@ -1,5 +1,6 @@
 import chamberService from "./chamber.service";
 import { summonProphecies } from "@src/game/prophecies";
+import type { ISeer } from "@src/types";
 import { RitualPhase } from "@src/types/ritual.types";
 
 interface DecipherResult {
@@ -8,28 +9,28 @@ interface DecipherResult {
     message: string;
 }
 
-function prepareRitual(chamberId: string): { ok: boolean; message: string } {
+function prepareRitual(chamberId: string): { ok: boolean; message: string; caster: ISeer | null } {
     const chamber = chamberService.retrieveChamber(chamberId);
 
-    if (!chamber) return { ok: false, message: "chamber not found" };
+    if (!chamber) return { ok: false, message: "chamber not found", caster: null };
 
     const randomCasterIndex = Math.floor(Math.random() * chamber.seers.length);
-    const newCasterId = chamber.seers[randomCasterIndex]!.seerId;
+    const newCaster = chamber.seers[randomCasterIndex]  as ISeer;
 
     chamber.seers.forEach((seer) => {
-        seer.isCaster = seer.seerId === newCasterId;
+        seer.isCaster = seer.seerId === newCaster.seerId;
         seer.hasUnveiled = false;
         seer.currentEssence = 0;
     });
 
-    chamber.casterId = newCasterId;
+    chamber.casterId = newCaster.seerId;
     chamber.prophecies = summonProphecies();
     chamber.omen = null;
     chamber.enigma = null;
     chamber.sigilHistory = [];
     chamber.phase = RitualPhase.DIVINATION;
 
-    return { ok: true, message: "ritual prepared" };
+    return { ok: true, message: "ritual prepared", caster: newCaster };
 }
 
 function manifestEnigma(

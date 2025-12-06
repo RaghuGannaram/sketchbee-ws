@@ -68,7 +68,7 @@ export default function registerChamberHandler(socket: Socket) {
                 seers: chamberService.retrieveSeers(chamberId),
             });
 
-            return cb && cb({ ok: true, message: "joined chamber", chamberId: chamberId, seer: registered.seer });
+            return cb && cb({ ok: true, message: "joined chamber", chamberId: chamberId, seer: registered.seer, hasReachedQuorum: registered.hasReachedQuorum });
         })
     );
 

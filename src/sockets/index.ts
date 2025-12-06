@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
 import registerChamberHandler from "./handlers/chamber.handler";
 import registerRuneHandler from "./handlers/rune.handler";
+import registerRitualHandler from "./handlers/ritual.handler";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {
@@ -42,5 +43,6 @@ export default function registerSocketHandlers(io: Server) {
 
         registerChamberHandler(socket);
         registerRuneHandler(socket);
+        registerRitualHandler(socket);
     });
 }
