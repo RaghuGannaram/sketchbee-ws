@@ -15,7 +15,7 @@ function prepareRitual(chamberId: string): { ok: boolean; message: string; caste
     if (!chamber) return { ok: false, message: "chamber not found", caster: null };
 
     const randomCasterIndex = Math.floor(Math.random() * chamber.seers.length);
-    const newCaster = chamber.seers[randomCasterIndex]  as ISeer;
+    const newCaster = chamber.seers[randomCasterIndex] as ISeer;
 
     chamber.seers.forEach((seer) => {
         seer.isCaster = seer.seerId === newCaster.seerId;
@@ -65,7 +65,7 @@ function attemptDecipher(chamberId: string, seerId: string, script: string): Dec
     const chamber = chamberService.retrieveChamber(chamberId);
 
     // Validation: Ritual must be active and Enigma must exist
-    if (!chamber || !chamber.enigma || chamber.phase !== RitualPhase.MANIFESTING) {
+    if (!chamber || !chamber.enigma || chamber.phase !== RitualPhase.MANIFESTATION) {
         return { outcome: "DISCORD", essenceGained: 0, message: script };
     }
 
@@ -104,7 +104,11 @@ function attemptDecipher(chamberId: string, seerId: string, script: string): Dec
         // Check if the Ritual Cycle should end (All Seers have unveiled?)
         // checkIfCycleComplete(chamber); // Dependency placeholder
 
-        return { outcome: "UNVEILED", essenceGained: essenceAwarded, message: "The Enigma is Unveiled!" };
+        return {
+            outcome: "UNVEILED",
+            essenceGained: essenceAwarded,
+            message: `${seer.epithet} cracked the enigma ...!`,
+        };
     }
 
     // 3. Check "Close" (Levenshtein or substring)

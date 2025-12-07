@@ -6,7 +6,7 @@ const PRIMORDIAL_PACT = {
     PLENUM: 8,
     MAX_CYCLES: 5,
     PROPHECY_DURATION_MS: 15000,
-    FLUX_DURATION_MS: 80000,
+    MANIFESTATION_DURATION_MS: 20000,
     REVEAL_DURATION_MS: 8000,
 };
 
@@ -81,7 +81,7 @@ function provisionChamber(): string {
             plenum: PRIMORDIAL_PACT.PLENUM,
             maxCycles: PRIMORDIAL_PACT.MAX_CYCLES,
             prophecyDurationMS: PRIMORDIAL_PACT.PROPHECY_DURATION_MS,
-            fluxDurationMS: PRIMORDIAL_PACT.FLUX_DURATION_MS,
+            manifestationDurationMS: PRIMORDIAL_PACT.MANIFESTATION_DURATION_MS,
             revealDurationMS: PRIMORDIAL_PACT.REVEAL_DURATION_MS,
         },
         manifestedAt: Date.now(),

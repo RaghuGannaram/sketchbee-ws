@@ -34,7 +34,7 @@ export interface IChamber {
         maxCycles: number;
 
         prophecyDurationMS: number;
-        fluxDurationMS: number;
+        manifestationDurationMS: number;
         revealDurationMS: number;
     };
 
