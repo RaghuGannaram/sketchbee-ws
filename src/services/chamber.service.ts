@@ -1,5 +1,5 @@
 import { type IChamber, type ISeer } from "@src/types/chamber.types";
-import { RitualPhase } from "@src/types/ritual.types";
+import { Rites } from "@src/types/ritual.types";
 
 const PRIMORDIAL_PACT = {
     QUORUM: 2,
@@ -57,7 +57,7 @@ function generateSeerId(epithet: string): string {
 
 function allocateChamber(): string {
     for (const chamber of retrieveChambers()) {
-        if (chamber.seers.length <= chamber.pact.plenum) {
+        if (chamber.seers.length < chamber.pact.plenum) {
             return chamber.chamberId;
         }
     }
@@ -70,12 +70,13 @@ function provisionChamber(): string {
     const newChamber: IChamber = {
         chamberId,
         seers: [],
-        phase: RitualPhase.CONGREGATION,
+        rite: Rites.CONGREGATION,
         casterId: null,
         prophecies: [],
         omen: null,
         enigma: null,
         sigilHistory: [],
+        unvailedSeers: [],
         pact: {
             quorum: PRIMORDIAL_PACT.QUORUM,
             plenum: PRIMORDIAL_PACT.PLENUM,
@@ -84,7 +85,7 @@ function provisionChamber(): string {
             manifestationDurationMS: PRIMORDIAL_PACT.MANIFESTATION_DURATION_MS,
             revealDurationMS: PRIMORDIAL_PACT.REVEAL_DURATION_MS,
         },
-        manifestedAt: Date.now(),
+        consecratedAt: Date.now(),
     };
 
     persistChamber(newChamber);
@@ -126,8 +127,6 @@ function registerSeer(
         epithet: profile.epithet,
         guise: profile.guise,
         essence: 0,
-        isCaster: false,
-        hasUnveiled: false,
         currentEssence: 0,
     };
 

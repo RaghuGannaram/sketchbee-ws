@@ -1,5 +1,5 @@
 import type { ISigil } from "./rune.types";
-import { RitualPhase } from "./ritual.types";
+import { Rites } from "./ritual.types";
 
 export interface ISeer {
     seerId: string;
@@ -10,16 +10,13 @@ export interface ISeer {
     guise: string;
 
     essence: number;
-
-    isCaster: boolean;
-    hasUnveiled: boolean;
     currentEssence: number;
 }
 
 export interface IChamber {
     chamberId: string;
     seers: ISeer[];
-    phase: RitualPhase;
+    rite: Rites;
 
     casterId: string | null;
     prophecies: string[];
@@ -27,7 +24,7 @@ export interface IChamber {
     enigma: string | null;
 
     sigilHistory: ISigil[];
-
+    unvailedSeers: string[];
     pact: {
         quorum: number;
         plenum: number;
@@ -38,5 +35,5 @@ export interface IChamber {
         revealDurationMS: number;
     };
 
-    manifestedAt: number;
+    consecratedAt: number;
 }

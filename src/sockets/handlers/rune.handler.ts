@@ -1,9 +1,9 @@
 import { Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
 import socketService from "@src/services/socket.service";
-import type { ISigil } from "@src/types/rune.types";
 import chamberService from "@src/services/chamber.service";
 import runeService from "@src/services/rune.service";
+import type { ISigil } from "@src/types/rune.types";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {
@@ -101,19 +101,18 @@ export default function registerRuneHandler(socket: Socket) {
     socket.on(
         "rune:script",
         socketAsync((data: { chamberId: string; seerId: string; epithet: string; script: string }, cb: Function) => {
-            const { chamberId, epithet, script } = data;
+            const { chamberId, seerId, epithet, script } = data;
 
-            if (!chamberId || !epithet || !script) {
+            if (!chamberId || !seerId || !epithet || !script) {
                 return cb && cb({ ok: false, message: "invalid parameters" });
             }
 
-            // TODO: Add logic here to check if 'script' matches the secret word (Game Logic)
+            const runeUnvailed = runeService.attemptDecipher(chamberId, seerId, script);
 
-            const runeUnvailed = runeService.attemptDecipher(chamberId, data.seerId, script);
             if (runeUnvailed.ok) {
                 socketService.emitToChamber(chamberId, "rune:unvailed", {
                     epithet,
-                    script: `${runeUnvailed.message} (${runeUnvailed.essenceGained} Essence)`,
+                    script: `${runeUnvailed.message}`,
                     isSystem: true,
                     timestamp: Date.now(),
                 });

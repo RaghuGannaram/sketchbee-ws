@@ -22,7 +22,7 @@ export default function registerChamberHandler(socket: Socket) {
     socket.on(
         "chamber:join",
         socketAsync((data: { epithet: string; guise: string; chamberId?: string; seerId?: string }, cb: Function) => {
-            let { chamberId, seerId, epithet, guise } = data;
+            let { epithet, guise, chamberId, seerId } = data;
 
             if (!epithet || !guise) {
                 return cb && cb({ ok: false, message: "epithet and guise are required to join chamber" });
@@ -61,14 +61,22 @@ export default function registerChamberHandler(socket: Socket) {
             socket.data.seerId = seerId;
             socket.data.chamberId = chamberId;
 
-            logger.info("chamber.handler: player %s joined chamber %s", registered.seer?.socketId, chamberId);
+            logger.info("chamber.handler: player %s joined chamber %s", registered.seer?.seerId, chamberId);
 
             socketService.emitToChamber(chamberId, "chamber:sync", {
                 chamberId: chamberId,
                 seers: chamberService.retrieveSeers(chamberId),
             });
 
-            return cb && cb({ ok: true, message: "joined chamber", chamberId: chamberId, seer: registered.seer, hasReachedQuorum: registered.hasReachedQuorum });
+            return (
+                cb &&
+                cb({
+                    ok: true,
+                    message: "joined chamber",
+                    seer: registered.seer,
+                    hasReachedQuorum: registered.hasReachedQuorum,
+                })
+            );
         })
     );
 
@@ -118,9 +126,7 @@ export default function registerChamberHandler(socket: Socket) {
                 });
 
                 socketService.emitToChamber(chamberId, "sys:message", {
-                    text: seer?.isCaster
-                        ? `${seer?.epithet} (caster) has disconnected.`
-                        : `${seer?.epithet} has disconnected.`,
+                    text: `${seer?.epithet} has disconnected.`,
                 });
             }
         })
