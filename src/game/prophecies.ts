@@ -47,12 +47,12 @@ function consecrateGrimoire(scriptures: IScripture[]): Grimoire {
     return grimoire;
 }
 
-function divineProphecies(grimoire: Grimoire): string[] {
+function divineProphecies(grimoire: Grimoire, count: number): string[] {
     const domains = Object.keys(grimoire) as Domain[];
 
     const selectedDomains: Domain[] = [];
 
-    while (selectedDomains.length < 3) {
+    while (selectedDomains.length < count) {
         const randomDomain = domains[Math.floor(Math.random() * domains.length)];
 
         if (randomDomain && !selectedDomains.includes(randomDomain)) {
@@ -82,6 +82,6 @@ const ancientScriptures: IScripture[] = [
 
 const PRIMORDIAL_GRIMOIRE = consecrateGrimoire(ancientScriptures);
 
-export function summonProphecies() {
-    return divineProphecies(PRIMORDIAL_GRIMOIRE);
+export function summonProphecies(count: number = 3): string[] {
+    return divineProphecies(PRIMORDIAL_GRIMOIRE, count);
 }

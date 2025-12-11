@@ -24,7 +24,8 @@ export interface IChamber {
     enigma: string | null;
 
     sigilHistory: ISigil[];
-    unvailedSeers: string[];
+    unveiledSeers: string[];
+    currentCycle: number;
     pact: {
         quorum: number;
         plenum: number;

@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
 import socketService from "@src/services/socket.service";
 import chamberService from "@src/services/chamber.service";
-import runeService from "@src/services/rune.service";
+import runeService, { Resonance } from "@src/services/rune.service";
 import type { ISigil } from "@src/types/rune.types";
 
 const socketAsync = (handler: Function) => {
@@ -26,8 +26,17 @@ export default function registerRuneHandler(socket: Socket) {
         socketAsync((data: { chamberId: string; casterId: string; sigils: ISigil[] }, cb: Function) => {
             const { chamberId, casterId, sigils } = data;
 
-            if (!chamberId) {
-                return cb && cb({ ok: false, message: "invalid chamberId" });
+            if (!chamberId || !casterId || !sigils) {
+                return cb && cb({ ok: false, message: "invalid parameters" });
+            }
+
+            const chamber = chamberService.retrieveChamber(chamberId);
+            if (!chamber) {
+                return cb && cb({ ok: false, message: "chamber not found" });
+            }
+
+            if (chamber.casterId !== casterId) {
+                return cb && cb({ ok: false, message: "only the caster can draw sigils" });
             }
 
             if (!Array.isArray(sigils) || sigils.length === 0) {
@@ -107,25 +116,38 @@ export default function registerRuneHandler(socket: Socket) {
                 return cb && cb({ ok: false, message: "invalid parameters" });
             }
 
-            const runeUnvailed = runeService.attemptDecipher(chamberId, seerId, script);
-
-            if (runeUnvailed.ok) {
-                socketService.emitToChamber(chamberId, "rune:unvailed", {
-                    epithet,
-                    script: `${runeUnvailed.message}`,
-                    isSystem: true,
-                    timestamp: Date.now(),
-                });
-            } else {
-                socketService.emitToChamber(chamberId, "rune:script", {
-                    epithet,
-                    script,
-                    isSystem: false,
-                    timestamp: Date.now(),
-                });
+            const chamber = chamberService.retrieveChamber(chamberId);
+            if (!chamber) {
+                return cb && cb({ ok: false, message: "chamber not found" });
             }
 
-            return cb && cb({ ok: true, message: "script broadcasted" });
+            const interpretation = runeService.decipherEnigma(chamber, seerId, script);
+
+            switch (interpretation.resonance) {
+                case Resonance.UNVEILED:
+                case Resonance.GLIMPSE:
+                    socketService.emitToChamber(chamberId, "rune:script", {
+                        epithet,
+                        script: interpretation.message,
+                        isSystem: true,
+                        timestamp: Date.now(),
+                    });
+                    break;
+
+                case Resonance.SCRIPT:
+                    socketService.emitToChamber(chamberId, "rune:script", {
+                        epithet,
+                        script: interpretation.message,
+                        isSystem: false,
+                        timestamp: Date.now(),
+                    });
+                    break;
+
+                case Resonance.SILENCE:
+                    break;
+            }
+
+            return cb && cb({ ok: true, message: "interpretation processed" });
         })
     );
 }

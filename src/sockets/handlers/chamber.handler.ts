@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
 import socketService from "@src/services/socket.service";
 import chamberService from "@src/services/chamber.service";
+import ritualService from "@src/services/ritual.service";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {
@@ -47,12 +48,7 @@ export default function registerChamberHandler(socket: Socket) {
             });
 
             if (!registered.ok) {
-                logger.info(
-                    "chamber.handler: failed to register seer %s in chamber %s: %s",
-                    seerId,
-                    chamberId,
-                    registered.message
-                );
+                logger.info("chamber.handler: failed to register seer %s in chamber %s: %s", seerId, chamberId, registered.message);
 
                 return cb && cb({ ok: false, message: registered.message });
             }
@@ -67,16 +63,24 @@ export default function registerChamberHandler(socket: Socket) {
                 chamberId: chamberId,
                 seers: chamberService.retrieveSeers(chamberId),
             });
+            socketService.emitToChamber(chamberId, "sys:message", {
+                text: `${registered.seer?.epithet} has joined the chamber.`,
+            });
 
-            return (
-                cb &&
-                cb({
-                    ok: true,
-                    message: "joined chamber",
-                    seer: registered.seer,
-                    hasReachedQuorum: registered.hasReachedQuorum,
-                })
-            );
+            if (registered.hasReachedQuorum) {
+                logger.info("Quorum met in chamber %s. Starting ritual.", chamberId);
+
+                const outcome = ritualService.advanceRitual(chamberId);
+
+                if (!outcome.ok) {
+                    logger.error("chamber.handler: failed to advance ritual in chamber %s: %s", chamberId, outcome.message);
+                    return;
+                }
+
+                // emitRitualOutcome(outcome, socket);
+            }
+
+            return cb && cb({ ok: true, message: "joined chamber", seer: registered.seer });
         })
     );
 
@@ -84,7 +88,7 @@ export default function registerChamberHandler(socket: Socket) {
         "chamber:leave",
         socketAsync((data: { chamberId: string; seerId: string }, cb: Function) => {
             const { chamberId, seerId } = data;
-            const { deregistered, chamberDisposed } = chamberService.deregisterSeer(chamberId, seerId);
+            const { deregistered, chamberDisposed, seer } = chamberService.deregisterSeer(chamberId, seerId);
 
             if (!deregistered) {
                 return cb && cb({ ok: false, message: "failed to leave chamber" });
@@ -98,6 +102,10 @@ export default function registerChamberHandler(socket: Socket) {
                 socketService.emitToChamber(chamberId, "chamber:sync", {
                     chamberId,
                     seers: chamberService.retrieveSeers(chamberId),
+                });
+
+                socketService.emitToChamber(chamberId, "sys:message", {
+                    text: `${seer?.epithet} has left.`,
                 });
 
                 logger.info("chamber.handler: player %s left from chamber %s", seerId, chamberId);

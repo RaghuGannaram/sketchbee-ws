@@ -76,7 +76,8 @@ function provisionChamber(): string {
         omen: null,
         enigma: null,
         sigilHistory: [],
-        unvailedSeers: [],
+        unveiledSeers: [],
+        currentCycle: 0,
         pact: {
             quorum: PRIMORDIAL_PACT.QUORUM,
             plenum: PRIMORDIAL_PACT.PLENUM,
@@ -117,7 +118,7 @@ function registerSeer(
     }
 
     if (chamber.seers.length >= chamber.pact.plenum) {
-        return { ok: false, message: "chamber is full", seer: null, hasReachedQuorum: false };
+        return { ok: false, message: "chamber is full", seer: null, hasReachedQuorum: true };
     }
 
     const seer: ISeer = {
@@ -137,10 +138,7 @@ function registerSeer(
     return { ok: true, message: "seer registered", seer, hasReachedQuorum };
 }
 
-function deregisterSeer(
-    chamberId: string,
-    seerId: string
-): { deregistered: boolean; chamberDisposed: boolean; seer: ISeer | null } {
+function deregisterSeer(chamberId: string, seerId: string): { deregistered: boolean; chamberDisposed: boolean; seer: ISeer | null } {
     const chamber = retrieveChamber(chamberId);
 
     if (!chamber) {
@@ -176,6 +174,7 @@ export default {
     allocateChamber,
     retrieveChamber,
     retrieveChambers,
+    disposeChamber,
     generateSeerId,
     registerSeer,
     deregisterSeer,
