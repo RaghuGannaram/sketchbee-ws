@@ -1,5 +1,13 @@
-import type { ISigil } from "./rune.types";
-import { Rites } from "./ritual.types";
+import { type ISigil } from "@src/types/rune.types";
+
+export enum Rites {
+    CONGREGATION = "CONGREGATION",
+    CONSECRATION = "CONSECRATION",
+    DIVINATION = "DIVINATION",
+    MANIFESTATION = "MANIFESTATION",
+    REVELATION = "REVELATION",
+    DISSOLUTION = "DISSOLUTION",
+}
 
 export interface ISeer {
     seerId: string;
@@ -31,7 +39,8 @@ export interface IChamber {
         plenum: number;
         maxCycles: number;
 
-        prophecyDurationMS: number;
+        consecrationDurationMS: number;
+        divinationDurationMS: number;
         manifestationDurationMS: number;
         revealDurationMS: number;
     };

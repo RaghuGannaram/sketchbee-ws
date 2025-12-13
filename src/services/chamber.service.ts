@@ -5,8 +5,9 @@ const PRIMORDIAL_PACT = {
     QUORUM: 2,
     PLENUM: 8,
     MAX_CYCLES: 5,
-    PROPHECY_DURATION_MS: 15000,
-    MANIFESTATION_DURATION_MS: 20000,
+    CONSECRATION_DURATION_MS: 5000,
+    DIVINATION_DURATION_MS: 15000,
+    MANIFESTATION_DURATION_MS: 60000,
     REVEAL_DURATION_MS: 8000,
 };
 
@@ -82,7 +83,8 @@ function provisionChamber(): string {
             quorum: PRIMORDIAL_PACT.QUORUM,
             plenum: PRIMORDIAL_PACT.PLENUM,
             maxCycles: PRIMORDIAL_PACT.MAX_CYCLES,
-            prophecyDurationMS: PRIMORDIAL_PACT.PROPHECY_DURATION_MS,
+            consecrationDurationMS: PRIMORDIAL_PACT.CONSECRATION_DURATION_MS,
+            divinationDurationMS: PRIMORDIAL_PACT.DIVINATION_DURATION_MS,
             manifestationDurationMS: PRIMORDIAL_PACT.MANIFESTATION_DURATION_MS,
             revealDurationMS: PRIMORDIAL_PACT.REVEAL_DURATION_MS,
         },

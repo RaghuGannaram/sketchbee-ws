@@ -3,7 +3,7 @@ import logger from "@src/configs/logger.config";
 import socketService from "@src/services/socket.service";
 import chamberService from "@src/services/chamber.service";
 import runeService, { Resonance } from "@src/services/rune.service";
-import type { ISigil } from "@src/types/rune.types";
+import { type ISigil } from "@src/types/rune.types";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {

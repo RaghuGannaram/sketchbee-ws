@@ -1,23 +1,23 @@
-import { rawAnimals, rawActions, rawObjects, rawProfessions, rawMovies, rawIdioms } from "./constants";
+import { rawAnimals, rawActions, rawObjects, rawProfessions, rawMovies, rawIdioms } from "../game/constants";
 
-export type Domain = "Beasts" | "Rituals" | "Artifacts" | "Guilds & Personas" | "Illusions" | "Parables";
+type Domain = "Beasts" | "Rituals" | "Artifacts" | "Guilds & Personas" | "Illusions" | "Parables";
 
-export type Circle = "Novice" | "Adept" | "Master";
+type Circle = "Novice" | "Adept" | "Master";
 
-export interface IScripture {
+interface IScripture {
     domain: Domain;
     circle: Circle;
     concepts: readonly string[];
 }
 
-export interface IEnigma {
+interface IEnigma {
     readonly enigmaId: string;
     readonly concept: string;
     readonly domain: Domain;
     readonly circle: Circle;
 }
 
-export type Grimoire = Record<Domain, IEnigma[]>;
+type Grimoire = Record<Domain, IEnigma[]>;
 
 function consecrateGrimoire(scriptures: IScripture[]): Grimoire {
     const grimoire: Grimoire = {
@@ -82,6 +82,10 @@ const ancientScriptures: IScripture[] = [
 
 const PRIMORDIAL_GRIMOIRE = consecrateGrimoire(ancientScriptures);
 
-export function summonProphecies(count: number = 3): string[] {
+function summonProphecies(count: number = 3): string[] {
     return divineProphecies(PRIMORDIAL_GRIMOIRE, count);
 }
+
+export default {
+    summonProphecies,
+};
