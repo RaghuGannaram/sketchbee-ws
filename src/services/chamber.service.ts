@@ -1,12 +1,11 @@
-import { type IChamber, type ISeer } from "@src/types/chamber.types";
-import { Rites } from "@src/types/ritual.types";
+import { Rites, type IChamber, type ISeer } from "@src/types/chamber.types";
 
 const PRIMORDIAL_PACT = {
     QUORUM: 2,
     PLENUM: 8,
     MAX_CYCLES: 5,
-    CONSECRATION_DURATION_MS: 5000,
-    DIVINATION_DURATION_MS: 15000,
+    CONSECRATION_DURATION_MS: 2000,
+    DIVINATION_DURATION_MS: 8000,
     MANIFESTATION_DURATION_MS: 60000,
     REVEAL_DURATION_MS: 8000,
 };

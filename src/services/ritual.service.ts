@@ -43,6 +43,8 @@ function transitionToConsecration(chamber: IChamber): IOracle {
 
     chamber.casterId = randomCaster.seerId;
     chamber.prophecies = prophecies;
+    chamber.omen = "";
+    chamber.enigma = "";
     chamber.unveiledSeers = [];
     chamber.currentCycle = (chamber.currentCycle || 0) + 1;
 
@@ -136,10 +138,10 @@ function transitionToDissolution(chamber: IChamber): IOracle {
     };
 }
 
-function invokeRitualTransition(chamber: IChamber, transitionFunc: (chamber: IChamber) => IOracle): IOracle {
+function invokeRitualTransition(chamber: IChamber, transitionFunc: (chamber: IChamber) => IOracle) {
     const oracle = transitionFunc(chamber);
 
-    if (!oracle.ok) return oracle;
+    if (!oracle.ok) return;
 
     emitRitual(oracle);
 
@@ -148,46 +150,52 @@ function invokeRitualTransition(chamber: IChamber, transitionFunc: (chamber: ICh
 
         oracle.timeLeftMs = deadline - Date.now();
     }
-    return oracle;
 }
 
-export function executeRite(chamber: IChamber): IOracle {
+export function executeRite(chamber: IChamber) {
     switch (chamber.rite) {
         case Rites.CONGREGATION:
-            return invokeRitualTransition(chamber, transitionToConsecration);
+            invokeRitualTransition(chamber, transitionToConsecration);
+            break;
 
         case Rites.CONSECRATION:
-            return invokeRitualTransition(chamber, transitionToDivination);
+            invokeRitualTransition(chamber, transitionToDivination);
+            break;
 
         case Rites.DIVINATION:
-            return invokeRitualTransition(chamber, transitionToManifestation);
+            invokeRitualTransition(chamber, transitionToManifestation);
+            break;
 
         case Rites.MANIFESTATION:
-            return invokeRitualTransition(chamber, transitionToRevelation);
+            invokeRitualTransition(chamber, transitionToRevelation);
+            break;
 
         case Rites.REVELATION:
-            return invokeRitualTransition(chamber, transitionToDissolution);
+            invokeRitualTransition(chamber, transitionToDissolution);
+            break;
 
         case Rites.DISSOLUTION:
-            return { ok: false, message: "chamber dissolved", rite: chamber.rite, chamber };
+            invokeRitualTransition(chamber, transitionToConsecration);
+            break;
 
         default:
-            return { ok: false, message: `invalid rite: ${chamber.rite}`, rite: chamber.rite, chamber };
+            invokeRitualTransition(chamber, transitionToConsecration);
     }
 }
 
-export function sealProphecy(chamber: IChamber, seerId: string, prophecy: string): IOracle {
+export function sealProphecy(chamber: IChamber, seerId: string, prophecy: string): { ok: boolean; message: string } {
     if (chamber.casterId !== seerId) {
-        return { ok: false, message: "only the Caster can seal the prophecy.", rite: chamber.rite, chamber };
+        return { ok: false, message: "only the Caster can seal the prophecy." };
     }
 
     if (!chamber.prophecies.includes(prophecy)) {
-        return { ok: false, message: "invalid prophecy selected.", rite: chamber.rite, chamber };
+        return { ok: false, message: "invalid prophecy selected." };
     }
 
     chamber.enigma = prophecy;
+    invokeRitualTransition(chamber, transitionToManifestation);
 
-    return invokeRitualTransition(chamber, transitionToManifestation);
+    return { ok: true, message: "prophecy sealed successfully." };
 }
 
 export default {

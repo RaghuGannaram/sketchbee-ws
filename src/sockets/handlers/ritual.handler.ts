@@ -36,11 +36,7 @@ export default function registerRitualHandler(socket: Socket) {
                 return cb && cb({ ok: false, message: "ritual already in progress" });
             }
 
-            const oracle = ritualService.executeRite(chamber);
-
-            if (!oracle.ok) {
-                return cb && cb({ ok: false, message: oracle.message });
-            }
+            ritualService.executeRite(chamber);
 
             return cb && cb({ ok: true, message: "ritual advanced" });
         })
@@ -52,19 +48,22 @@ export default function registerRitualHandler(socket: Socket) {
             if (!chamberId || !prophecy) return cb({ ok: false, message: "Invalid parameters" });
 
             const seerId = socket.data.seerId;
-            if (!seerId) return cb({ ok: false, message: "Seer not authenticated" });
-
-            const chamber = chamberService.retrieveChamber(chamberId);
-            if (!chamber) return cb({ ok: false, message: "Chamber not found" });
-
-            const oracle = ritualService.sealProphecy(chamber, seerId, prophecy);
-
-            if (!oracle.ok) {
-                return cb({ ok: false, message: oracle.message });
+            if (!seerId) {
+                return cb && cb({ ok: false, message: "Seer not authenticated" });
             }
 
-            emitRitual(oracle);
-            cb({ ok: true, message: "Prophecy sealed" });
+            const chamber = chamberService.retrieveChamber(chamberId);
+            if (!chamber) {
+                return cb && cb({ ok: false, message: "Chamber not found" });
+            }
+
+            const sealed = ritualService.sealProphecy(chamber, seerId, prophecy);
+
+            if (!sealed.ok) {
+                return cb && cb({ ok: false, message: sealed.message });
+            }
+
+            return cb && cb({ ok: true, message: "Prophecy sealed successfully" });
         })
     );
 }
