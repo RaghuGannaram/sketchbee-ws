@@ -2,7 +2,6 @@ import { Socket } from "socket.io";
 import logger from "@src/configs/logger.config";
 import ritualService from "@src/services/ritual.service";
 import chamberService from "@src/services/chamber.service";
-import { emitRitual } from "@src/sockets/emitters/ritual.emitter";
 import { Rites } from "@src/types/chamber.types";
 
 const socketAsync = (handler: Function) => {

@@ -1,7 +1,8 @@
 import gameService from "@src/services/game.service";
-import { emitRitual } from "@src/sockets/emitters/ritual.emitter";
-import { type IOracle } from "@src/types/ritual.types";
+import ritualEmitter from "@src/sockets/emitters/ritual.emitter";
+import logger from "@src/configs/logger.config";
 import { Rites, type IChamber } from "@src/types/chamber.types";
+import { type IOracle } from "@src/types/ritual.types";
 
 const ritualTimers = new Map<string, NodeJS.Timeout>();
 
@@ -143,7 +144,7 @@ function invokeRitualTransition(chamber: IChamber, transitionFunc: (chamber: ICh
 
     if (!oracle.ok) return;
 
-    emitRitual(oracle);
+    ritualEmitter.emit(oracle);
 
     if (oracle.timer) {
         const deadline = igniteRitualTimer(chamber.chamberId, oracle.timer.duration, oracle.timer.callback);
@@ -155,31 +156,44 @@ function invokeRitualTransition(chamber: IChamber, transitionFunc: (chamber: ICh
 export function executeRite(chamber: IChamber) {
     switch (chamber.rite) {
         case Rites.CONGREGATION:
+            logger.debug("ritual.service: Transitioning to CONSECRATION in chamber %s", chamber.chamberId);
             invokeRitualTransition(chamber, transitionToConsecration);
             break;
 
         case Rites.CONSECRATION:
+            logger.debug("ritual.service: Transitioning to DIVINATION in chamber %s", chamber.chamberId);
             invokeRitualTransition(chamber, transitionToDivination);
             break;
 
         case Rites.DIVINATION:
+            logger.debug("ritual.service: Transitioning to MANIFESTATION in chamber %s", chamber.chamberId);
             invokeRitualTransition(chamber, transitionToManifestation);
             break;
 
         case Rites.MANIFESTATION:
+            logger.debug("ritual.service: Transitioning to REVELATION in chamber %s", chamber.chamberId);
             invokeRitualTransition(chamber, transitionToRevelation);
             break;
 
         case Rites.REVELATION:
-            invokeRitualTransition(chamber, transitionToDissolution);
+            if (chamber.currentCycle >= chamber.pact.maxCycles) {
+                logger.debug("ritual.service: Transitioning to DISSOLUTION in chamber %s as maximum cycles reached", chamber.chamberId);
+                invokeRitualTransition(chamber, transitionToDissolution);
+            } else {
+                logger.debug("ritual.service: Transitioning to CONSECRATION in chamber %s", chamber.chamberId);
+                invokeRitualTransition(chamber, transitionToConsecration);
+            }
             break;
 
         case Rites.DISSOLUTION:
-            invokeRitualTransition(chamber, transitionToConsecration);
+            logger.debug("ritual.service: chamber %s already dissolved", chamber.chamberId);
             break;
 
         default:
+            logger.warn("ritual.service: Unknown rite %s in chamber %s. Resetting to CONSECRATION.", chamber.rite, chamber.chamberId);
+            chamber.rite = Rites.CONGREGATION;
             invokeRitualTransition(chamber, transitionToConsecration);
+            break;
     }
 }
 

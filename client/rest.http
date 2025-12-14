@@ -32,6 +32,13 @@ Content-Type: application/json
 Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Mzc4NmQ5NTY5OGE5MDFjYTNhMzgwNCIsImZ1bGxuYW1lIjoiVGVzdCAxIiwiaGFuZGxlIjoidGVzdDEiLCJlbWFpbCI6InRlc3QxQGZha2VtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MTQ5MTk0MjcsImV4cCI6MTcxNDk5ODYyNywiYXVkIjoiNjYzNzg2ZDk1Njk4YTkwMWNhM2EzODA0IiwiaXNzIjoibmV4dXMucmFnaHVnYW5uYXJhbS5jb20ifQ.MiefcZQvLc4HFJGIOBz3YkwiK10Is6DO1uDJR_8-kxo
 
 
+
+
+
+
+
+
+
 ### all chambers
 GET http://localhost:5000/api/v1/chamber/all HTTP/1.1
 

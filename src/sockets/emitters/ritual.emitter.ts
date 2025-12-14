@@ -3,7 +3,7 @@ import logger from "@src/configs/logger.config";
 import { type IOracle } from "@src/types/ritual.types";
 import { Rites } from "@src/types/chamber.types";
 
-export function emitRitual(oracle: IOracle) {
+function emit(oracle: IOracle) {
     const chamber = oracle.chamber;
     if (!chamber) return;
 
@@ -12,7 +12,7 @@ export function emitRitual(oracle: IOracle) {
 
     switch (oracle.rite) {
         case Rites.CONSECRATION:
-            socketService.emitToChamber(chamberId, "ritual:consecration", {
+            socketService.emitToChamber(chamberId, "ritual:rite", {
                 rite: oracle.rite,
                 message: oracle.message,
                 casterId: chamber.casterId,
@@ -22,23 +22,23 @@ export function emitRitual(oracle: IOracle) {
             const caster = chamber.seers.find((seer) => seer.seerId === chamber.casterId)!;
 
             socketService.emitToSocket(caster.socketId, "ritual:prophecies", {
+                casterId: chamber.casterId,
                 prophecies: chamber.prophecies,
             });
 
             break;
 
         case Rites.DIVINATION:
-            socketService.emitToChamber(chamberId, "ritual:divination", {
+            socketService.emitToChamber(chamberId, "ritual:rite", {
                 rite: oracle.rite,
                 message: oracle.message,
-                casterId: chamber.casterId,
                 timeLeftMs: timeLeftMs,
             });
 
             break;
 
         case Rites.MANIFESTATION:
-            socketService.emitToChamber(chamberId, "ritual:manifestation", {
+            socketService.emitToChamber(chamberId, "ritual:rite", {
                 rite: oracle.rite,
                 message: oracle.message,
                 casterId: chamber.casterId,
@@ -48,17 +48,17 @@ export function emitRitual(oracle: IOracle) {
             break;
 
         case Rites.REVELATION:
-            socketService.emitToChamber(chamberId, "ritual:revelation", {
+            socketService.emitToChamber(chamberId, "ritual:rite", {
                 rite: oracle.rite,
                 message: oracle.message,
                 enigma: chamber.enigma,
-                seers: chamber.seers,
+                unveiledSeers: chamber.unveiledSeers,
                 timeLeftMs: timeLeftMs,
             });
             break;
 
         case Rites.DISSOLUTION:
-            socketService.emitToChamber(chamberId, "ritual:dissolution", {
+            socketService.emitToChamber(chamberId, "ritual:rite", {
                 rite: oracle.rite,
                 message: oracle.message,
             });
@@ -70,5 +70,5 @@ export function emitRitual(oracle: IOracle) {
 }
 
 export default {
-    emitRitual,
+    emit,
 };

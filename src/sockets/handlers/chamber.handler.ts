@@ -3,7 +3,6 @@ import logger from "@src/configs/logger.config";
 import socketService from "@src/services/socket.service";
 import chamberService from "@src/services/chamber.service";
 import ritualService from "@src/services/ritual.service";
-import { emitOracle } from "./ritual.handler";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {
@@ -77,13 +76,7 @@ export default function registerChamberHandler(socket: Socket) {
                     return;
                 }
 
-                const oracle = ritualService.executeRite(chamber);
-                if (!oracle.ok) {
-                    logger.error("chamber.handler: failed to execute ritual in chamber %s: %s", chamberId, oracle.message);
-                    return;
-                }
-
-                emitOracle(oracle, socket);
+                ritualService.executeRite(chamber);
             }
 
             return cb && cb({ ok: true, message: "joined chamber", seer: registered.seer });

@@ -3,11 +3,11 @@ import { Rites, type IChamber, type ISeer } from "@src/types/chamber.types";
 const PRIMORDIAL_PACT = {
     QUORUM: 2,
     PLENUM: 8,
-    MAX_CYCLES: 5,
-    CONSECRATION_DURATION_MS: 2000,
-    DIVINATION_DURATION_MS: 8000,
-    MANIFESTATION_DURATION_MS: 60000,
-    REVEAL_DURATION_MS: 8000,
+    MAX_CYCLES: 10,
+    CONSECRATION_DURATION_MS: 10_000,
+    DIVINATION_DURATION_MS: 10_000,
+    MANIFESTATION_DURATION_MS: 10_000,
+    REVEAL_DURATION_MS: 10_000,
 };
 
 const chambers = new Map<string, IChamber>();
@@ -73,8 +73,8 @@ function provisionChamber(): string {
         rite: Rites.CONGREGATION,
         casterId: null,
         prophecies: [],
-        omen: null,
-        enigma: null,
+        omen: "",
+        enigma: "",
         sigilHistory: [],
         unveiledSeers: [],
         currentCycle: 0,

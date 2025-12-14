@@ -28,8 +28,8 @@ export interface IChamber {
 
     casterId: string | null;
     prophecies: string[];
-    omen: string | null;
-    enigma: string | null;
+    omen: string;
+    enigma: string;
 
     sigilHistory: ISigil[];
     unveiledSeers: string[];

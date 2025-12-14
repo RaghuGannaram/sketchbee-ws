@@ -1,4 +1,4 @@
-import { Rites } from "@src/types/ritual.types";
+import { Rites } from "@src/types/chamber.types";
 import type { IChamber } from "@src/types";
 
 export enum Resonance {
