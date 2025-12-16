@@ -37,8 +37,6 @@ Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Mzc4NmQ5NT
 
 
 
-
-
 ### all chambers
 GET http://localhost:5000/api/v1/chamber/all HTTP/1.1
 

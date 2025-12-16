@@ -5,7 +5,7 @@ export interface IOracle {
     message: string;
     rite: Rites;
     chamber: IChamber;
-    timeLeftMs?: number;
+    terminus?: number;
     timer?: {
         duration: number;
         callback: () => void;

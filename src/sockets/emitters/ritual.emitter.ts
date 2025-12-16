@@ -8,7 +8,7 @@ function emit(oracle: IOracle) {
     if (!chamber) return;
 
     const chamberId = chamber.chamberId;
-    const timeLeftMs = oracle.timeLeftMs || 0;
+    const terminus = oracle.terminus || 0;
 
     switch (oracle.rite) {
         case Rites.CONSECRATION:
@@ -16,7 +16,7 @@ function emit(oracle: IOracle) {
                 rite: oracle.rite,
                 message: oracle.message,
                 casterId: chamber.casterId,
-                timeLeftMs: timeLeftMs,
+                terminus: terminus,
             });
 
             const caster = chamber.seers.find((seer) => seer.seerId === chamber.casterId)!;
@@ -32,7 +32,7 @@ function emit(oracle: IOracle) {
             socketService.emitToChamber(chamberId, "ritual:rite", {
                 rite: oracle.rite,
                 message: oracle.message,
-                timeLeftMs: timeLeftMs,
+                terminus: terminus,
             });
 
             break;
@@ -43,7 +43,7 @@ function emit(oracle: IOracle) {
                 message: oracle.message,
                 casterId: chamber.casterId,
                 omen: chamber.omen,
-                timeLeftMs: timeLeftMs,
+                terminus: terminus,
             });
             break;
 
@@ -53,7 +53,7 @@ function emit(oracle: IOracle) {
                 message: oracle.message,
                 enigma: chamber.enigma,
                 unveiledSeers: chamber.unveiledSeers,
-                timeLeftMs: timeLeftMs,
+                terminus: terminus,
             });
             break;
 

@@ -23,6 +23,7 @@ function igniteRitualTimer(chamberId: string, durationMs: number, callback: () =
     }, durationMs);
 
     ritualTimers.set(chamberId, timer);
+
     return Date.now() + durationMs;
 }
 
@@ -144,13 +145,12 @@ function invokeRitualTransition(chamber: IChamber, transitionFunc: (chamber: ICh
 
     if (!oracle.ok) return;
 
-    ritualEmitter.emit(oracle);
-
     if (oracle.timer) {
         const deadline = igniteRitualTimer(chamber.chamberId, oracle.timer.duration, oracle.timer.callback);
-
-        oracle.timeLeftMs = deadline - Date.now();
+        oracle.terminus = deadline;
     }
+
+    ritualEmitter.emit(oracle);
 }
 
 export function executeRite(chamber: IChamber) {
