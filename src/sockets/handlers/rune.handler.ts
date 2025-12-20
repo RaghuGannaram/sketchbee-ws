@@ -126,10 +126,9 @@ export default function registerRuneHandler(socket: Socket) {
             switch (interpretation.resonance) {
                 case Resonance.UNVEILED:
                 case Resonance.GLIMPSE:
-                    socketService.emitToChamber(chamberId, "rune:script", {
+                    socketService.emitToChamber(chamberId, "rune:unveiled", {
                         epithet,
                         script: interpretation.message,
-                        isSystem: true,
                         timestamp: Date.now(),
                     });
                     break;
@@ -138,7 +137,6 @@ export default function registerRuneHandler(socket: Socket) {
                     socketService.emitToChamber(chamberId, "rune:script", {
                         epithet,
                         script: interpretation.message,
-                        isSystem: false,
                         timestamp: Date.now(),
                     });
                     break;

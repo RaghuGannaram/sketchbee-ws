@@ -95,7 +95,7 @@ function transitionToManifestation(chamber: IChamber): IOracle {
     const enigma = chamber.enigma || chamber.prophecies[0]!;
     const omen = enigma
         .split("")
-        .map((char) => (char === " " ? " " : "_"))
+        .map((char) => (char === " " ? " " : "_ "))
         .join("");
 
     chamber.omen = omen;
