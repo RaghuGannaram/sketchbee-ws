@@ -45,5 +45,5 @@ export interface IChamber {
         revealDurationMS: number;
     };
 
-    consecratedAt: number;
+    establishedAt: number;
 }

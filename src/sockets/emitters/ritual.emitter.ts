@@ -19,13 +19,6 @@ function emit(oracle: IOracle) {
                 terminus: terminus,
             });
 
-            const caster = chamber.seers.find((seer) => seer.seerId === chamber.casterId)!;
-
-            socketService.emitToSocket(caster.socketId, "ritual:prophecies", {
-                casterId: chamber.casterId,
-                prophecies: chamber.prophecies,
-            });
-
             break;
 
         case Rites.DIVINATION:
@@ -33,6 +26,13 @@ function emit(oracle: IOracle) {
                 rite: oracle.rite,
                 message: oracle.message,
                 terminus: terminus,
+            });
+
+            const caster = chamber.seers.find((seer) => seer.seerId === chamber.casterId)!;
+
+            socketService.emitToSocket(caster.socketId, "ritual:prophecies", {
+                casterId: chamber.casterId,
+                prophecies: chamber.prophecies,
             });
 
             break;

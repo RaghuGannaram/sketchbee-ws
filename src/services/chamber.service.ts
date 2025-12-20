@@ -4,10 +4,10 @@ const PRIMORDIAL_PACT = {
     QUORUM: 2,
     PLENUM: 8,
     MAX_CYCLES: 10,
-    CONSECRATION_DURATION_MS: 10_000,
-    DIVINATION_DURATION_MS: 10_000,
-    MANIFESTATION_DURATION_MS: 10_000,
-    REVEAL_DURATION_MS: 10_000,
+    CONSECRATION_DURATION_MS: 3_000,
+    DIVINATION_DURATION_MS: 12_000,
+    MANIFESTATION_DURATION_MS: 15_000,
+    REVEAL_DURATION_MS: 9_000,
 };
 
 const chambers = new Map<string, IChamber>();
@@ -87,7 +87,7 @@ function provisionChamber(): string {
             manifestationDurationMS: PRIMORDIAL_PACT.MANIFESTATION_DURATION_MS,
             revealDurationMS: PRIMORDIAL_PACT.REVEAL_DURATION_MS,
         },
-        consecratedAt: Date.now(),
+        establishedAt: Date.now(),
     };
 
     persistChamber(newChamber);
@@ -104,6 +104,10 @@ function registerSeer(
         return { ok: false, message: "chamber not found", seer: null, hasReachedQuorum: false };
     }
 
+    if (chamber.seers.length >= chamber.pact.plenum) {
+        return { ok: false, message: "chamber is full", seer: null, hasReachedQuorum: true };
+    }
+
     const existingIndex = chamber.seers.findIndex((seer) => seer.seerId === profile.seerId);
 
     if (existingIndex !== -1 && chamber.seers[existingIndex]) {
@@ -116,10 +120,6 @@ function registerSeer(
         chamber.seers[existingIndex] = existingSeer;
 
         return { ok: true, message: "seer re-connected", seer: existingSeer, hasReachedQuorum: false };
-    }
-
-    if (chamber.seers.length >= chamber.pact.plenum) {
-        return { ok: false, message: "chamber is full", seer: null, hasReachedQuorum: true };
     }
 
     const seer: ISeer = {
