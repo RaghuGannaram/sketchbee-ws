@@ -14,12 +14,8 @@ export interface IInterpretation {
 }
 
 function decipherEnigma(chamber: IChamber, seerId: string, script: string): IInterpretation {
-    if (!chamber.enigma || chamber.rite !== Rites.MANIFESTATION) {
+    if (chamber.rite !== Rites.MANIFESTATION) {
         return { resonance: Resonance.SCRIPT, message: script };
-    }
-
-    if (chamber.casterId === seerId || chamber.unveiledSeers.some((seer) => seer.seerId === seerId)) {
-        return { resonance: Resonance.SILENCE, message: "" };
     }
 
     const guesser = chamber.seers.find((seer) => seer.seerId === seerId);
@@ -31,6 +27,10 @@ function decipherEnigma(chamber: IChamber, seerId: string, script: string): IInt
     const enigma = chamber.enigma.toLowerCase();
 
     if (guess === enigma) {
+        if (chamber.casterId === seerId || chamber.unveiledSeers.some((seer) => seer.seerId === seerId)) {
+            return { resonance: Resonance.SILENCE, message: "" };
+        }
+
         return { resonance: Resonance.UNVEILED, message: `'${guesser.epithet}' unvailed the enigma!` };
     }
 
