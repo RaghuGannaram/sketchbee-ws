@@ -16,6 +16,8 @@ function emit(oracle: IOracle) {
                 rite: oracle.rite,
                 message: oracle.message,
                 casterId: chamber.casterId,
+                currentCycle: chamber.currentCycle,
+                totalCycles: chamber.pact.maxCycles,
                 terminus: terminus,
             });
 
