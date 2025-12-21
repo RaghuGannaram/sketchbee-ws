@@ -4,6 +4,7 @@ import socketService from "@src/services/socket.service";
 import chamberService from "@src/services/chamber.service";
 import runeService, { Resonance } from "@src/services/rune.service";
 import { type ISigil } from "@src/types/rune.types";
+import ritualService from "@src/services/ritual.service";
 
 const socketAsync = (handler: Function) => {
     return async (...args: any[]) => {
@@ -126,6 +127,8 @@ export default function registerRuneHandler(socket: Socket) {
             switch (interpretation.resonance) {
                 case Resonance.UNVEILED:
                 case Resonance.GLIMPSE:
+                    ritualService.rewardSeer(chamber, seerId);
+
                     socketService.emitToChamber(chamberId, "rune:unveiled", {
                         epithet,
                         script: interpretation.message,

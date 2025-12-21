@@ -212,7 +212,40 @@ export function sealProphecy(chamber: IChamber, seerId: string, prophecy: string
     return { ok: true, message: "prophecy sealed successfully." };
 }
 
+export function calculateEssence(startedAt: number, durationMs: number): number {
+    const now = Date.now();
+    const elapsedMS = now - startedAt;
+    const remainingMS = durationMs - elapsedMS;
+
+    if (remainingMS <= 0) return 10;
+
+    const baseScore = 100;
+    const bonusMax = 400;
+    const ratio = remainingMS / durationMs;
+
+    return Math.floor(baseScore + ratio * bonusMax);
+}
+
+export function rewardSeer(chamber: IChamber, seerId: string) {
+    const startedAt = chamber.riteStartedAt;
+    const riteDurationMS = chamber.pact.manifestationDurationMS;
+
+    const currentEssence = calculateEssence(startedAt, riteDurationMS);
+
+    const seer = chamber.seers.find((s) => s.seerId === seerId);
+
+    if (seer) {
+        seer.currentEssence = currentEssence;
+        seer.essence += currentEssence;
+
+        if (!chamber.unveiledSeers.some((s) => s.seerId === seerId)) {
+            chamber.unveiledSeers.push(seer);
+        }
+    }
+}
+
 export default {
     executeRite,
     sealProphecy,
+    rewardSeer,
 };

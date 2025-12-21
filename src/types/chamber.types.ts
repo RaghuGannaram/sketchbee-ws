@@ -25,6 +25,7 @@ export interface IChamber {
     chamberId: string;
     seers: ISeer[];
     rite: Rites;
+    riteStartedAt: number;
 
     casterId: string | null;
     prophecies: string[];
@@ -32,7 +33,7 @@ export interface IChamber {
     enigma: string;
 
     sigilHistory: ISigil[];
-    unveiledSeers: string[];
+    unveiledSeers: ISeer[];
     currentCycle: number;
     pact: {
         quorum: number;

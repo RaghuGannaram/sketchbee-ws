@@ -71,6 +71,7 @@ function provisionChamber(): string {
         chamberId,
         seers: [],
         rite: Rites.CONGREGATION,
+        riteStartedAt: Date.now(),
         casterId: null,
         prophecies: [],
         omen: "",

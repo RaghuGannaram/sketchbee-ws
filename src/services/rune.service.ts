@@ -18,7 +18,7 @@ function decipherEnigma(chamber: IChamber, seerId: string, script: string): IInt
         return { resonance: Resonance.SCRIPT, message: script };
     }
 
-    if (chamber.casterId === seerId || chamber.unveiledSeers.includes(seerId)) {
+    if (chamber.casterId === seerId || chamber.unveiledSeers.some((seer) => seer.seerId === seerId)) {
         return { resonance: Resonance.SILENCE, message: "" };
     }
 
@@ -31,7 +31,6 @@ function decipherEnigma(chamber: IChamber, seerId: string, script: string): IInt
     const enigma = chamber.enigma.toLowerCase();
 
     if (guess === enigma) {
-        chamber.unveiledSeers.push(seerId);
         return { resonance: Resonance.UNVEILED, message: `'${guesser.epithet}' unvailed the enigma!` };
     }
 
