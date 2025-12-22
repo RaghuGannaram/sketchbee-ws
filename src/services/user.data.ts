@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import UserModel, { type UserDocument } from "@src/models/User.model";
 import { DataError, DataErrors, catchAsyncDataError, processMongoError } from "@src/utils/application-errors";
-import type { IUser, IUserUpdate } from "@src/types";
+import type { IUser } from "@src/types";
 import logger from "@src/configs/logger.config";
 
 const isValidObjectId = (id: string) => Types.ObjectId.isValid(id);
@@ -50,7 +50,7 @@ const getUserRecordByID = catchAsyncDataError(async function (userId: string) {
 
 const updateUserRecord = catchAsyncDataError(async function (
     userId: string,
-    updateData: IUserUpdate | { [key in "avatar" | "background"]: string }
+    updateData: any | { [key in "avatar" | "background"]: string }
 ): Promise<IUser> {
     logger.debug(`user.data: updating user record for user: %s`, userId);
 
@@ -102,7 +102,7 @@ const updateUserFollowRecord = catchAsyncDataError(async function (
     if (!followeeDoc)
         throw new DataError(DataErrors.DB_RECORD_NOT_FOUND, "followed not found (Can't follow non-existent user).");
 
-    if (!followeeDoc.followers.some((id) => id.equals(followerDoc.id))) {
+    if (!followeeDoc.friends.some((id) => id.equals(followerDoc.id))) {
         await followeeDoc.updateOne({ $push: { followers: followerDoc.id } });
         await followerDoc.updateOne({ $push: { followees: followeeDoc.id } });
         return `you started followee ${followeeDoc.handle}.`;
