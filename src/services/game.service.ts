@@ -1,4 +1,4 @@
-import { rawAnimals, rawActions, rawObjects, rawProfessions, rawMovies, rawIdioms } from "../game/constants";
+import { rawAnimals, rawActions, rawObjects, rawProfessions, rawMovies } from "../game/constants";
 
 type Domain = "Beasts" | "Rituals" | "Artifacts" | "Guilds & Personas" | "Illusions" | "Parables";
 
