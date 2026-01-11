@@ -77,7 +77,7 @@ const ancientScriptures: IScripture[] = [
     { domain: "Artifacts", circle: "Adept", concepts: rawObjects },
     { domain: "Guilds & Personas", circle: "Adept", concepts: rawProfessions },
     { domain: "Illusions", circle: "Master", concepts: rawMovies },
-    { domain: "Parables", circle: "Master", concepts: rawIdioms },
+    // { domain: "Parables", circle: "Master", concepts: rawIdioms },
 ];
 
 const PRIMORDIAL_GRIMOIRE = consecrateGrimoire(ancientScriptures);
