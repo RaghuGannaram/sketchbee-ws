@@ -55,15 +55,6 @@ function generateSeerId(epithet: string): string {
     return `${cleanName}_${timestamp}_${random}`;
 }
 
-function allocateChamber(): string {
-    for (const chamber of retrieveChambers()) {
-        if (chamber.seers.length < chamber.pact.plenum) {
-            return chamber.chamberId;
-        }
-    }
-    return provisionChamber();
-}
-
 function provisionChamber(): string {
     const chamberId = generateChamberId();
 
@@ -93,6 +84,15 @@ function provisionChamber(): string {
 
     persistChamber(newChamber);
     return chamberId;
+}
+
+function allocateChamber(): string {
+    for (const chamber of retrieveChambers()) {
+        if (chamber.seers.length < chamber.pact.plenum) {
+            return chamber.chamberId;
+        }
+    }
+    return provisionChamber();
 }
 
 function registerSeer(

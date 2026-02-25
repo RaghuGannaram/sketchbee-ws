@@ -10,6 +10,7 @@ const socketAsync = (handler: Function) => {
             await handler(...args);
         } catch (err) {
             logger.error("ritual.handler: Socket Error:", err);
+
             const lastArg = args[args.length - 1];
             if (typeof lastArg === "function") {
                 lastArg({ ok: false, error: "Internal Server Error" });

@@ -1,6 +1,6 @@
 import { rawAnimals, rawActions, rawObjects, rawProfessions, rawMovies } from "../game/constants";
 
-type Domain = "Beasts" | "Rituals" | "Artifacts" | "Guilds & Personas" | "Illusions" | "Parables";
+type Domain = "Beasts" | "Rituals" | "Artifacts" | "Guilds & Personas" | "Illusions";
 
 type Circle = "Novice" | "Adept" | "Master";
 
@@ -26,7 +26,6 @@ function consecrateGrimoire(scriptures: IScripture[]): Grimoire {
         Artifacts: [],
         "Guilds & Personas": [],
         Illusions: [],
-        Parables: [],
     };
 
     let runeSequence = 1;
@@ -77,7 +76,6 @@ const ancientScriptures: IScripture[] = [
     { domain: "Artifacts", circle: "Adept", concepts: rawObjects },
     { domain: "Guilds & Personas", circle: "Adept", concepts: rawProfessions },
     { domain: "Illusions", circle: "Master", concepts: rawMovies },
-    // { domain: "Parables", circle: "Master", concepts: rawIdioms },
 ];
 
 const PRIMORDIAL_GRIMOIRE = consecrateGrimoire(ancientScriptures);

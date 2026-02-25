@@ -9,7 +9,7 @@ const socketAsync = (handler: Function) => {
         try {
             await handler(...args);
         } catch (err) {
-            logger.error("chamber.handler: Socket Error:", err);
+            logger.error("socket.handler: Socket Error:", err);
 
             const lastArg = args[args.length - 1];
             if (typeof lastArg === "function") {
