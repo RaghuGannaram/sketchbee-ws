@@ -48,7 +48,11 @@ function transitionToConsecration(chamber: IChamber): IOracle {
 	chamber.omen = "";
 	chamber.enigma = "";
 	chamber.unveiledSeers = [];
+	chamber.seers.forEach((seer) => {
+		seer.currentEssence = 0;
+	});
 	chamber.currentCycle = (chamber.currentCycle || 0) + 1;
+	chamber.riteStartedAt = Date.now();
 
 	return {
 		ok: true,
@@ -67,6 +71,7 @@ function transitionToDivination(chamber: IChamber): IOracle {
 
 	const currentCasterId = chamber.casterId;
 	const availableProphecies = chamber.prophecies;
+	chamber.riteStartedAt = Date.now();
 
 	if (!currentCasterId || !availableProphecies || availableProphecies.length === 0) {
 		return {
@@ -100,6 +105,7 @@ function transitionToManifestation(chamber: IChamber): IOracle {
 
 	chamber.omen = omen;
 	chamber.prophecies = [];
+	chamber.riteStartedAt = Date.now();
 
 	return {
 		ok: true,
@@ -115,6 +121,7 @@ function transitionToManifestation(chamber: IChamber): IOracle {
 
 function transitionToRevelation(chamber: IChamber): IOracle {
 	chamber.rite = Rites.REVELATION;
+	chamber.riteStartedAt = Date.now();
 
 	return {
 		ok: true,
@@ -131,6 +138,7 @@ function transitionToDissolution(chamber: IChamber): IOracle {
 	extinguishRitualTimer(chamber.chamberId);
 
 	chamber.rite = Rites.DISSOLUTION;
+	chamber.riteStartedAt = Date.now();
 
 	return {
 		ok: true,
@@ -219,28 +227,37 @@ export function calculateEssence(startedAt: number, durationMs: number): number 
 
 	if (remainingMS <= 0) return 0;
 
-	const baseScore = 100;
-	const bonusMax = 400;
 	const ratio = remainingMS / durationMs;
 
-	return Math.floor(baseScore + ratio * bonusMax);
+	return Math.ceil(ratio * 10);
 }
 
 export function rewardSeer(chamber: IChamber, seerId: string) {
+	if (chamber.unveiledSeers.some((s) => s.seerId === seerId)) return;
+
 	const startedAt = chamber.riteStartedAt;
 	const riteDurationMS = chamber.pact.manifestationDurationMS;
 
 	const currentEssence = calculateEssence(startedAt, riteDurationMS);
 
 	const seer = chamber.seers.find((s) => s.seerId === seerId);
+	const caster = chamber.seers.find((s) => s.seerId === chamber.casterId);
 
 	if (seer) {
 		seer.currentEssence = currentEssence;
 		seer.essence += currentEssence;
+		chamber.unveiledSeers.push(seer);
+	}
 
-		if (!chamber.unveiledSeers.some((s) => s.seerId === seerId)) {
-			chamber.unveiledSeers.push(seer);
-		}
+	if (caster) {
+		const totalPossibleGuessers = Math.max(1, chamber.seers.length - 1);
+
+		const CASTER_MAX_ROUND_SCORE = 10;
+
+		const CASTER_REWARD = Math.ceil(CASTER_MAX_ROUND_SCORE / totalPossibleGuessers);
+
+		caster.currentEssence = (caster.currentEssence ?? 0) + CASTER_REWARD;
+		caster.essence += CASTER_REWARD;
 	}
 }
 

@@ -54,7 +54,7 @@ function emit(oracle: IOracle) {
 				rite: oracle.rite,
 				message: oracle.message,
 				enigma: chamber.enigma,
-				unveiledSeers: chamber.unveiledSeers,
+				seers: chamber.seers,
 				terminus: terminus,
 			});
 			break;

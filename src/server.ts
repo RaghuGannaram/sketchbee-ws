@@ -61,8 +61,8 @@ server.on("close", () => {
 	logger.error("application server: closed...");
 });
 
-server.on("clientError", () => {
-	logger.error("application server: client error...");
+server.on("clientError", (err) => {
+	logger.error("application server: client error... %o", err);
 });
 
 process.on("uncaughtException", (err) => {

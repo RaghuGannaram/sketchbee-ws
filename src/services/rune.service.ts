@@ -3,7 +3,6 @@ import type { IChamber } from "@src/types";
 
 export enum Resonance {
 	UNVEILED = "UNVEILED",
-	// GLIMPSE = "GLIMPSE",
 	SCRIPT = "SCRIPT",
 	SILENCE = "SILENCE",
 }
@@ -31,17 +30,8 @@ function decipherEnigma(chamber: IChamber, seerId: string, script: string): IInt
 			return { resonance: Resonance.SILENCE, message: "" };
 		}
 
-		return {
-			resonance: Resonance.UNVEILED,
-			message: `'${guesser.epithet}' unvailed the enigma!`,
-		};
+		return { resonance: Resonance.UNVEILED, message: `'${guesser.epithet}' unvailed the enigma!` };
 	}
-
-	// const isClose = enigma.includes(guess) && Math.abs(enigma.length - guess.length) < 2;
-
-	// if (isClose) {
-	//     return { resonance: Resonance.GLIMPSE, message: `'${guesser.epithet}' got a glimpse of the enigma!` };
-	// }
 
 	return { resonance: Resonance.SCRIPT, message: script };
 }

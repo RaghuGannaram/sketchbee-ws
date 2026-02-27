@@ -153,14 +153,18 @@ export default function registerRuneHandler(socket: Socket) {
 
 				switch (interpretation.resonance) {
 					case Resonance.UNVEILED:
-						// case Resonance.GLIMPSE:
 						ritualService.rewardSeer(chamber, seerId);
 
 						socketService.emitToChamber(chamberId, "rune:unveiled", {
 							epithet,
+							seerId,
 							script: interpretation.message,
 							timestamp: Date.now(),
 						});
+
+						if (chamber.unveiledSeers.length === chamber.seers.length - 1) {
+							ritualService.executeRite(chamber);
+						}
 						break;
 
 					case Resonance.SCRIPT:
