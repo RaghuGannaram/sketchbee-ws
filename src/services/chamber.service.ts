@@ -135,7 +135,7 @@ function registerSeer(
 
     chamber.seers.push(seer);
 
-    const hasReachedQuorum = chamber.seers.length >= chamber.pact.quorum;
+    const hasReachedQuorum = chamber.seers.length === chamber.pact.quorum;
 
     return { ok: true, message: "seer registered", seer, hasReachedQuorum };
 }
