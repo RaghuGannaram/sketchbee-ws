@@ -38,18 +38,38 @@ const options: winston.LoggerOptions = {
 	level: level,
 	transports: [
 		new transports.Console({
-			format: format.combine(format.colorize(), format.splat(), format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }), format.errors({ stack: true }), consoleLogFormat),
+			format: format.combine(
+				format.colorize(),
+				format.splat(),
+				format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
+				format.errors({ stack: true }),
+				consoleLogFormat
+			),
 		}),
 		...(!isServerless
 			? [
 					new transports.File({
 						filename: "logs/error.log",
-						format: format.combine(format.splat(), format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }), format.errors({ stack: true }), fileLogFormat),
+						format: format.combine(
+							format.splat(),
+							format.timestamp({
+								format: "YYYY-MM-DD HH:mm:ss.SSS",
+							}),
+							format.errors({ stack: true }),
+							fileLogFormat
+						),
 						level: "error",
 					}),
 					new transports.File({
 						filename: "logs/out.log",
-						format: format.combine(format.splat(), format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }), format.errors({ stack: true }), fileLogFormat),
+						format: format.combine(
+							format.splat(),
+							format.timestamp({
+								format: "YYYY-MM-DD HH:mm:ss.SSS",
+							}),
+							format.errors({ stack: true }),
+							fileLogFormat
+						),
 					}),
 				]
 			: []),

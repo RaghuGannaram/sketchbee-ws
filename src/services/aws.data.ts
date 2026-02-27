@@ -1,4 +1,4 @@
-import ms, {type StringValue} from "ms";
+import ms, { type StringValue } from "ms";
 import AWS from "@src/configs/aws.config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import envAccess from "@src/configs/env.config";
@@ -9,62 +9,62 @@ import logger from "@src/configs/logger.config";
 const { bucket } = envAccess.aws.credentials();
 
 const getFile = catchAsyncDataError(async (key: string): Promise<string> => {
-    logger.debug(`aws.service: getting signed URL for file: %s from s3 bucket`, key);
-    
-    let fileURL = "";
-    const params = {
-        Bucket: bucket,
-        Key: key,
-    };
+	logger.debug(`aws.service: getting signed URL for file: %s from s3 bucket`, key);
 
-    try {
-        fileURL = await getSignedUrl(AWS.s3ClientInstance, new AWS.GetObjectCommand(params), {
-            expiresIn: ms(AWS.signedUrlValidity as StringValue) / 1000,
-        });
-    } catch (error) {
-        processAWSError(error);
-    }
+	let fileURL = "";
+	const params = {
+		Bucket: bucket,
+		Key: key,
+	};
 
-    return fileURL;
+	try {
+		fileURL = await getSignedUrl(AWS.s3ClientInstance, new AWS.GetObjectCommand(params), {
+			expiresIn: ms(AWS.signedUrlValidity as StringValue) / 1000,
+		});
+	} catch (error) {
+		processAWSError(error);
+	}
+
+	return fileURL;
 });
 
 const uploadFile = catchAsyncDataError(async (imageCategory: string, imageBuffer: Buffer): Promise<string> => {
-    logger.debug(`aws.service: uploading %s file to s3 bucket`, imageCategory);
+	logger.debug(`aws.service: uploading %s file to s3 bucket`, imageCategory);
 
-    const uniqueFileName = imageCategory + "_" + generateRandomName(16);
-    const params = {
-        Bucket: bucket,
-        Key: uniqueFileName,
-        Body: imageBuffer,
-        ContentType: "image/webp",
-    };
+	const uniqueFileName = imageCategory + "_" + generateRandomName(16);
+	const params = {
+		Bucket: bucket,
+		Key: uniqueFileName,
+		Body: imageBuffer,
+		ContentType: "image/webp",
+	};
 
-    try {
-        await AWS.s3ClientInstance.send(new AWS.PutObjectCommand(params));
-    } catch (error) {
-        processAWSError(error);
-    }
+	try {
+		await AWS.s3ClientInstance.send(new AWS.PutObjectCommand(params));
+	} catch (error) {
+		processAWSError(error);
+	}
 
-    return uniqueFileName;
+	return uniqueFileName;
 });
 
 const deleteFile = catchAsyncDataError(async (key: string): Promise<void> => {
-    logger.debug(`aws.service: deleting file: %s from s3 bucket`, key);
+	logger.debug(`aws.service: deleting file: %s from s3 bucket`, key);
 
-    const params = {
-        Bucket: bucket,
-        Key: key,
-    };
+	const params = {
+		Bucket: bucket,
+		Key: key,
+	};
 
-    try {
-        await AWS.s3ClientInstance.send(new AWS.DeleteObjectCommand(params));
-    } catch (error) {
-        processAWSError(error);
-    }
+	try {
+		await AWS.s3ClientInstance.send(new AWS.DeleteObjectCommand(params));
+	} catch (error) {
+		processAWSError(error);
+	}
 });
 
 export default {
-    getFile,
-    uploadFile,
-    deleteFile,
+	getFile,
+	uploadFile,
+	deleteFile,
 };

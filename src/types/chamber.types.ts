@@ -1,50 +1,50 @@
 import { type ISigil } from "@src/types/rune.types";
 
 export enum Rites {
-    CONGREGATION = "CONGREGATION",
-    CONSECRATION = "CONSECRATION",
-    DIVINATION = "DIVINATION",
-    MANIFESTATION = "MANIFESTATION",
-    REVELATION = "REVELATION",
-    DISSOLUTION = "DISSOLUTION",
+	CONGREGATION = "CONGREGATION",
+	CONSECRATION = "CONSECRATION",
+	DIVINATION = "DIVINATION",
+	MANIFESTATION = "MANIFESTATION",
+	REVELATION = "REVELATION",
+	DISSOLUTION = "DISSOLUTION",
 }
 
 export interface ISeer {
-    seerId: string;
-    socketId: string;
-    chamberId?: string;
+	seerId: string;
+	socketId: string;
+	chamberId?: string;
 
-    epithet: string;
-    guise: string;
+	epithet: string;
+	guise: string;
 
-    essence: number;
-    currentEssence: number;
+	essence: number;
+	currentEssence: number;
 }
 
 export interface IChamber {
-    chamberId: string;
-    seers: ISeer[];
-    rite: Rites;
-    riteStartedAt: number;
+	chamberId: string;
+	seers: ISeer[];
+	rite: Rites;
+	riteStartedAt: number;
 
-    casterId: string | null;
-    prophecies: string[];
-    omen: string;
-    enigma: string;
+	casterId: string | null;
+	prophecies: string[];
+	omen: string;
+	enigma: string;
 
-    sigilHistory: ISigil[];
-    unveiledSeers: ISeer[];
-    currentCycle: number;
-    pact: {
-        quorum: number;
-        plenum: number;
-        maxCycles: number;
+	sigilHistory: ISigil[];
+	unveiledSeers: ISeer[];
+	currentCycle: number;
+	pact: {
+		quorum: number;
+		plenum: number;
+		maxCycles: number;
 
-        consecrationDurationMS: number;
-        divinationDurationMS: number;
-        manifestationDurationMS: number;
-        revealDurationMS: number;
-    };
+		consecrationDurationMS: number;
+		divinationDurationMS: number;
+		manifestationDurationMS: number;
+		revealDurationMS: number;
+	};
 
-    establishedAt: number;
+	establishedAt: number;
 }

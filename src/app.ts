@@ -18,8 +18,8 @@ const app: express.Application = express();
 
 const apiGatewayURL = envAccess.api.gatewayUrl();
 const corsOptions = {
-    origin: apiGatewayURL,
-    credentials: true,
+	origin: apiGatewayURL,
+	credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -30,8 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/health-check", (_req: Request, res: Response) => {
-    logger.info("Health check");
-    res.status(200).json({ message: "OK" });
+	logger.info("Health check");
+	res.status(200).json({ message: "OK" });
 });
 
 app.use("/api/v1", api_v1);

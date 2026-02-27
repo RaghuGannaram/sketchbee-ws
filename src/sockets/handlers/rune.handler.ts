@@ -37,7 +37,13 @@ export default function registerRuneHandler(socket: Socket) {
 			}
 
 			if (chamber.casterId !== casterId) {
-				return cb && cb({ ok: false, message: "only the caster can draw sigils" });
+				return (
+					cb &&
+					cb({
+						ok: false,
+						message: "only the caster can draw sigils",
+					})
+				);
 			}
 
 			if (!Array.isArray(sigils) || sigils.length === 0) {
@@ -69,7 +75,13 @@ export default function registerRuneHandler(socket: Socket) {
 			}
 
 			if (casterId !== chamber.casterId) {
-				return cb && cb({ ok: false, message: "only the caster can shift the vellum" });
+				return (
+					cb &&
+					cb({
+						ok: false,
+						message: "only the caster can shift the vellum",
+					})
+				);
 			}
 
 			socketService.broadcastToChamberExcept(chamberId, casterId, "rune:shift", {
@@ -97,7 +109,13 @@ export default function registerRuneHandler(socket: Socket) {
 			}
 
 			if (casterId !== chamber.casterId) {
-				return cb && cb({ ok: false, message: "only the caster can clear the vellum" });
+				return (
+					cb &&
+					cb({
+						ok: false,
+						message: "only the caster can clear the vellum",
+					})
+				);
 			}
 
 			socketService.broadcastToChamberExcept(chamberId, casterId, "rune:void", {
@@ -110,45 +128,55 @@ export default function registerRuneHandler(socket: Socket) {
 
 	socket.on(
 		"rune:script",
-		socketAsync((data: { chamberId: string; seerId: string; epithet: string; script: string }, cb: Function) => {
-			const { chamberId, seerId, epithet, script } = data;
+		socketAsync(
+			(
+				data: {
+					chamberId: string;
+					seerId: string;
+					epithet: string;
+					script: string;
+				},
+				cb: Function
+			) => {
+				const { chamberId, seerId, epithet, script } = data;
 
-			if (!chamberId || !seerId || !epithet || !script) {
-				return cb && cb({ ok: false, message: "invalid parameters" });
+				if (!chamberId || !seerId || !epithet || !script) {
+					return cb && cb({ ok: false, message: "invalid parameters" });
+				}
+
+				const chamber = chamberService.retrieveChamber(chamberId);
+				if (!chamber) {
+					return cb && cb({ ok: false, message: "chamber not found" });
+				}
+
+				const interpretation = runeService.decipherEnigma(chamber, seerId, script);
+
+				switch (interpretation.resonance) {
+					case Resonance.UNVEILED:
+						// case Resonance.GLIMPSE:
+						ritualService.rewardSeer(chamber, seerId);
+
+						socketService.emitToChamber(chamberId, "rune:unveiled", {
+							epithet,
+							script: interpretation.message,
+							timestamp: Date.now(),
+						});
+						break;
+
+					case Resonance.SCRIPT:
+						socketService.emitToChamber(chamberId, "rune:script", {
+							epithet,
+							script: interpretation.message,
+							timestamp: Date.now(),
+						});
+						break;
+
+					case Resonance.SILENCE:
+						break;
+				}
+
+				return cb && cb({ ok: true, message: "interpretation processed" });
 			}
-
-			const chamber = chamberService.retrieveChamber(chamberId);
-			if (!chamber) {
-				return cb && cb({ ok: false, message: "chamber not found" });
-			}
-
-			const interpretation = runeService.decipherEnigma(chamber, seerId, script);
-
-			switch (interpretation.resonance) {
-				case Resonance.UNVEILED:
-					// case Resonance.GLIMPSE:
-					ritualService.rewardSeer(chamber, seerId);
-
-					socketService.emitToChamber(chamberId, "rune:unveiled", {
-						epithet,
-						script: interpretation.message,
-						timestamp: Date.now(),
-					});
-					break;
-
-				case Resonance.SCRIPT:
-					socketService.emitToChamber(chamberId, "rune:script", {
-						epithet,
-						script: interpretation.message,
-						timestamp: Date.now(),
-					});
-					break;
-
-				case Resonance.SILENCE:
-					break;
-			}
-
-			return cb && cb({ ok: true, message: "interpretation processed" });
-		})
+		)
 	);
 }

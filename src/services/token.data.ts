@@ -1,131 +1,130 @@
 import JWT from "jsonwebtoken";
-import ms, {type StringValue} from "ms";
+import ms, { type StringValue } from "ms";
 import sessionStore from "@src/configs/session.config";
 import envAccess from "@src/configs/env.config";
-import {
-    DataError,
-    DataErrors,
-    catchAsyncDataError,
-    processTokenError,
-    processCacheError,
-} from "@src/utils/application-errors";
+import { DataError, DataErrors, catchAsyncDataError, processTokenError, processCacheError } from "@src/utils/application-errors";
 import type { ITokenPayload } from "@src/types";
 import logger from "@src/configs/logger.config";
 
-const { accessTokenSecret, refreshTokenSecret, accessTokenValidity, refreshTokenValidity, refreshTokenMaxAge } =
-    envAccess.jwt.credentials();
+const { accessTokenSecret, refreshTokenSecret, accessTokenValidity, refreshTokenValidity, refreshTokenMaxAge } = envAccess.jwt.credentials();
 
 const issueAccessToken = catchAsyncDataError(async (user: ITokenPayload) => {
-    logger.debug(`token.service: issuing access token for user: %o`, user);
+	logger.debug(`token.service: issuing access token for user: %o`, user);
 
-    const payload = {
-        profile : user.profile,
-        type: "access",
-    };
+	const payload = {
+		profile: user.profile,
+		type: "access",
+	};
 
-    const options = {
-        expiresIn: ms(accessTokenValidity as StringValue) / 1000,
-        issuer: "sketchbee.raghugannaram.com",
-        audience: user.profile.id,
-    };
+	const options = {
+		expiresIn: ms(accessTokenValidity as StringValue) / 1000,
+		issuer: "sketchbee.raghugannaram.com",
+		audience: user.profile.id,
+	};
 
-    const token = JWT.sign(payload, accessTokenSecret, options);
+	const token = JWT.sign(payload, accessTokenSecret, options);
 
-    try {
-        await sessionStore.set(`access:${user.profile.id}`, token, ms(accessTokenValidity as StringValue) / 1000);
-    } catch (error) {
-        processCacheError(error);
-    }
+	try {
+		await sessionStore.set(`access:${user.profile.id}`, token, ms(accessTokenValidity as StringValue) / 1000);
+	} catch (error) {
+		processCacheError(error);
+	}
 
-    return token;
+	return token;
 });
 
 const issueRefreshToken = catchAsyncDataError(async (user: ITokenPayload) => {
-    logger.debug(`token.service: issuing refresh token for user: %o`, user);
+	logger.debug(`token.service: issuing refresh token for user: %o`, user);
 
-    const payload = {
-        profile : user.profile,
-        type: "refresh",
-    };
+	const payload = {
+		profile: user.profile,
+		type: "refresh",
+	};
 
-    const options = {
-        expiresIn: ms(refreshTokenValidity as StringValue) / 1000,
-        issuer: "sketchbee.raghugannaram.com",
-        audience: user.profile.id,
-    };
+	const options = {
+		expiresIn: ms(refreshTokenValidity as StringValue) / 1000,
+		issuer: "sketchbee.raghugannaram.com",
+		audience: user.profile.id,
+	};
 
-    const token = JWT.sign(payload, refreshTokenSecret, options);
+	const token = JWT.sign(payload, refreshTokenSecret, options);
 
-    try {
-        await sessionStore.set(`refresh:${user.profile.id}`, token, ms(refreshTokenValidity as StringValue) / 1000);
-    } catch (error) {
-        processCacheError(error);
-    }
+	try {
+		await sessionStore.set(`refresh:${user.profile.id}`, token, ms(refreshTokenValidity as StringValue) / 1000);
+	} catch (error) {
+		processCacheError(error);
+	}
 
-    return token;
+	return token;
 });
 
 const validateAccessToken = catchAsyncDataError(async (accessToken: string) => {
-    logger.debug(`token.service: validating access token...`);
+	logger.debug(`token.service: validating access token...`);
 
-    let decoded;
+	let decoded;
 
-    try {
-        decoded = JWT.verify(accessToken, accessTokenSecret) as ITokenPayload;
-    } catch (error) {
-        processTokenError(error);
-    }
+	try {
+		decoded = JWT.verify(accessToken, accessTokenSecret) as ITokenPayload;
+	} catch (error) {
+		processTokenError(error);
+	}
 
-    let storedAccessToken: string | null = null;
-    try {
-        storedAccessToken = await sessionStore.get(`access:${decoded.profile.id}`);
-    } catch (error) {
-        processCacheError(error);
-    }
+	let storedAccessToken: string | null = null;
+	try {
+		storedAccessToken = await sessionStore.get(`access:${decoded.profile.id}`);
+	} catch (error) {
+		processCacheError(error);
+	}
 
-    if (accessToken !== storedAccessToken) throw new DataError(DataErrors.DATA_INVALID_TOKEN, "invalid access token.");
+	if (accessToken !== storedAccessToken) throw new DataError(DataErrors.DATA_INVALID_TOKEN, "invalid access token.");
 
-    return decoded;
+	return decoded;
 });
 
 const validateRefreshToken = catchAsyncDataError(async (refreshToken: string) => {
-    logger.debug(`token.service: validating refresh token...`);
+	logger.debug(`token.service: validating refresh token...`);
 
-    let decoded;
+	let decoded;
 
-    try {
-        decoded = JWT.verify(refreshToken, refreshTokenSecret) as ITokenPayload;
-    } catch (error) {
-        processTokenError(error);
-    }
+	try {
+		decoded = JWT.verify(refreshToken, refreshTokenSecret) as ITokenPayload;
+	} catch (error) {
+		processTokenError(error);
+	}
 
-    let storedRefreshToken: string | null = null;
-    try {
-        storedRefreshToken = await sessionStore.get(`refresh:${decoded.profile.id}`);
-    } catch (error) {
-        processCacheError(error);
-    }
+	let storedRefreshToken: string | null = null;
+	try {
+		storedRefreshToken = await sessionStore.get(`refresh:${decoded.profile.id}`);
+	} catch (error) {
+		processCacheError(error);
+	}
 
-    if (refreshToken !== storedRefreshToken) {
-        throw new DataError(DataErrors.DATA_INVALID_TOKEN, "incorrect refresh token.");
-    }
+	if (refreshToken !== storedRefreshToken) {
+		throw new DataError(DataErrors.DATA_INVALID_TOKEN, "incorrect refresh token.");
+	}
 
-    if (Date.now() - (decoded.iat ?? 0) * 1000 > ms(refreshTokenMaxAge as StringValue)) {
-        throw new DataError(DataErrors.TOKEN_EXCEEDED_MAX_AGE, "refresh token has exceeded maximum lifetime.");
-    }
+	if (Date.now() - (decoded.iat ?? 0) * 1000 > ms(refreshTokenMaxAge as StringValue)) {
+		throw new DataError(DataErrors.TOKEN_EXCEEDED_MAX_AGE, "refresh token has exceeded maximum lifetime.");
+	}
 
-    return decoded;
+	return decoded;
 });
 
 const deleteUserTokens = catchAsyncDataError(async (id: string) => {
-    logger.debug(`token.service: deleting user tokens...`);
+	logger.debug(`token.service: deleting user tokens...`);
 
-    try {
-        await Promise.all([await sessionStore.delete(`access:${id}`), await sessionStore.delete(`refresh:${id}`)]);
-    } catch (error) {
-        processCacheError(error);
-    }
-    return;
+	try {
+		await Promise.all([await sessionStore.delete(`access:${id}`), await sessionStore.delete(`refresh:${id}`)]);
+	} catch (error) {
+		processCacheError(error);
+	}
+	return;
 });
 
-export default { issueAccessToken, issueRefreshToken, validateAccessToken, validateRefreshToken, deleteUserTokens };
+export default {
+	issueAccessToken,
+	issueRefreshToken,
+	validateAccessToken,
+	validateRefreshToken,
+	deleteUserTokens,
+};

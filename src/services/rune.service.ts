@@ -31,7 +31,10 @@ function decipherEnigma(chamber: IChamber, seerId: string, script: string): IInt
 			return { resonance: Resonance.SILENCE, message: "" };
 		}
 
-		return { resonance: Resonance.UNVEILED, message: `'${guesser.epithet}' unvailed the enigma!` };
+		return {
+			resonance: Resonance.UNVEILED,
+			message: `'${guesser.epithet}' unvailed the enigma!`,
+		};
 	}
 
 	// const isClose = enigma.includes(guess) && Math.abs(enigma.length - guess.length) < 2;

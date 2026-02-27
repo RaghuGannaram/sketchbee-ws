@@ -7,84 +7,69 @@ import type { IRegistration, ILogin, ITokenPayload } from "@src/types";
 import logger from "@src/configs/logger.config";
 
 const createUser = catchAsyncBusinessError(async function (registrationData: IRegistration) {
-    logger.info(`auth.business: creating new user with email: %s`, registrationData.email);
+	logger.info(`auth.business: creating new user with email: %s`, registrationData.email);
 
-    let user = await authDataService.createUserRecord(registrationData);
+	let user = await authDataService.createUserRecord(registrationData);
 
-    [user.avatar, user.background] = await Promise.all([
-        awsDataService.getFile(user.avatar),
-        awsDataService.getFile(user.background),
-    ]);
+	[user.avatar, user.background] = await Promise.all([awsDataService.getFile(user.avatar), awsDataService.getFile(user.background)]);
 
-    const payload: ITokenPayload = {
-        profile: {
-            id: user.id,
-            fullname: user.fullname,
-            handle: user.handle,
-            role: user.role,
-        },
-    };
+	const payload: ITokenPayload = {
+		profile: {
+			id: user.id,
+			fullname: user.fullname,
+			handle: user.handle,
+			role: user.role,
+		},
+	};
 
-    const [accessToken, refreshToken] = await Promise.all([
-        tokenDataService.issueAccessToken(payload),
-        tokenDataService.issueRefreshToken(payload),
-    ]);
+	const [accessToken, refreshToken] = await Promise.all([tokenDataService.issueAccessToken(payload), tokenDataService.issueRefreshToken(payload)]);
 
-    const safeResponse = hideSensitiveInfo(user, "password");
+	const safeResponse = hideSensitiveInfo(user, "password");
 
-    return { data: safeResponse, accessToken, refreshToken };
+	return { data: safeResponse, accessToken, refreshToken };
 });
 
 const validateUser = catchAsyncBusinessError(async function (userCredentials: ILogin) {
-    logger.info(`auth.business: validating user with email: %s`, userCredentials.email);
+	logger.info(`auth.business: validating user with email: %s`, userCredentials.email);
 
-    const user = await authDataService.validateUserRecord(userCredentials);
+	const user = await authDataService.validateUserRecord(userCredentials);
 
-    [user.avatar, user.background] = await Promise.all([
-        awsDataService.getFile(user.avatar),
-        awsDataService.getFile(user.background),
-    ]);
+	[user.avatar, user.background] = await Promise.all([awsDataService.getFile(user.avatar), awsDataService.getFile(user.background)]);
 
-    const payload: ITokenPayload = {
-        profile: {
-            id: user.id,
-            fullname: user.fullname,
-            handle: user.handle,
-            role: user.role,
-        },
-    };
+	const payload: ITokenPayload = {
+		profile: {
+			id: user.id,
+			fullname: user.fullname,
+			handle: user.handle,
+			role: user.role,
+		},
+	};
 
-    const [accessToken, refreshToken] = await Promise.all([
-        tokenDataService.issueAccessToken(payload),
-        tokenDataService.issueRefreshToken(payload),
-    ]);
+	const [accessToken, refreshToken] = await Promise.all([tokenDataService.issueAccessToken(payload), tokenDataService.issueRefreshToken(payload)]);
 
-    const safeResponse = hideSensitiveInfo(user, "password");
+	const safeResponse = hideSensitiveInfo(user, "password");
 
-    return { data: safeResponse, accessToken, refreshToken };
+	return { data: safeResponse, accessToken, refreshToken };
 });
 
 const refreshUserTokens = catchAsyncBusinessError(async function (refreshToken: string) {
-    logger.info(`auth.business: refreshing user tokens`);
+	logger.info(`auth.business: refreshing user tokens`);
 
-    const user = await tokenDataService.validateRefreshToken(refreshToken);
+	const user = await tokenDataService.validateRefreshToken(refreshToken);
 
-    const [newAccessToken, newRefreshToken] = await Promise.all([
-        tokenDataService.issueAccessToken(user),
-        tokenDataService.issueRefreshToken(user),
-    ]);
+	const [newAccessToken, newRefreshToken] = await Promise.all([tokenDataService.issueAccessToken(user), tokenDataService.issueRefreshToken(user)]);
 
-    return { newAccessToken, newRefreshToken };
+	return { newAccessToken, newRefreshToken };
 });
 
 const clearUserTokens = catchAsyncBusinessError(async function (refreshToken: string) {
-    logger.info(`auth.business: clearing user tokens`);
+	logger.info(`auth.business: clearing user tokens`);
 
-    const user = await tokenDataService.validateRefreshToken(refreshToken);
+	const user = await tokenDataService.validateRefreshToken(refreshToken);
 
-    await tokenDataService.deleteUserTokens(user.profile.id);
+	await tokenDataService.deleteUserTokens(user.profile.id);
 
-    return;
+	return;
 });
 
 export default { createUser, validateUser, refreshUserTokens, clearUserTokens };

@@ -6,19 +6,19 @@ import socketService from "@src/services/socket.service";
 import registerSocketHandlers from "@src/sockets";
 
 function setupSocketIO(server: http.Server): void {
-    const apiGatewayUrl = envAccess.api.gatewayUrl();
+	const apiGatewayUrl = envAccess.api.gatewayUrl();
 
-    const io = new Server(server, {
-        cors: {
-            origin: apiGatewayUrl,
-            methods: ["GET", "POST"],
-        },
-    });
+	const io = new Server(server, {
+		cors: {
+			origin: apiGatewayUrl,
+			methods: ["GET", "POST"],
+		},
+	});
 
-    socketService.initIO(io);
-    registerSocketHandlers(io);
+	socketService.initIO(io);
+	registerSocketHandlers(io);
 
-    logger.info("socket.config: socket.io initialized");
+	logger.info("socket.config: socket.io initialized");
 }
 
 export default setupSocketIO;
