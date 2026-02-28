@@ -94,14 +94,13 @@ export default function registerChamberHandler(socket: Socket) {
 					ritualService.executeRite(chamber);
 				}
 
-				return (
-					cb &&
-					cb({
-						ok: true,
-						message: "joined chamber",
-						seer: registered.seer,
-					})
-				);
+				let fathomedChamber = null;
+
+				if (registered.hasSurpassedQuorum) {
+					fathomedChamber = chamberService.fathomChamber(chamberId);
+				}
+
+				return cb && cb({ ok: true, message: "joined chamber", seer: registered.seer, chamber: fathomedChamber });
 			}
 		)
 	);
@@ -134,6 +133,16 @@ export default function registerChamberHandler(socket: Socket) {
 				socketService.emitToChamber(chamberId, "sys:message", {
 					text: `${seer?.epithet} has left.`,
 				});
+
+				const chamber = chamberService.retrieveChamber(chamberId);
+				if (!chamber) {
+					logger.error("chamber.handler: failed to retrieve chamber %s after quorum met", chamberId);
+					return;
+				}
+
+				if (chamber.casterId == seerId) {
+					ritualService.executeRite(chamber);
+				}
 
 				logger.info("chamber.handler: player %s left from chamber %s", seerId, chamberId);
 			}

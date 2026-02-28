@@ -108,6 +108,7 @@ function registerSeer(
 	message: string;
 	seer: ISeer | null;
 	hasReachedQuorum: boolean;
+	hasSurpassedQuorum: boolean;
 } {
 	const chamber = retrieveChamber(chamberId);
 
@@ -117,6 +118,7 @@ function registerSeer(
 			message: "chamber not found",
 			seer: null,
 			hasReachedQuorum: false,
+			hasSurpassedQuorum: false,
 		};
 	}
 
@@ -126,6 +128,7 @@ function registerSeer(
 			message: "chamber is full",
 			seer: null,
 			hasReachedQuorum: true,
+			hasSurpassedQuorum: false,
 		};
 	}
 
@@ -145,6 +148,7 @@ function registerSeer(
 			message: "seer re-connected",
 			seer: existingSeer,
 			hasReachedQuorum: false,
+			hasSurpassedQuorum: false,
 		};
 	}
 
@@ -161,8 +165,9 @@ function registerSeer(
 	chamber.seers.push(seer);
 
 	const hasReachedQuorum = chamber.seers.length === chamber.pact.quorum;
+	const hasSurpassedQuorum = chamber.seers.length > chamber.pact.quorum;
 
-	return { ok: true, message: "seer registered", seer, hasReachedQuorum };
+	return { ok: true, message: "seer registered", seer, hasReachedQuorum, hasSurpassedQuorum };
 }
 
 function deregisterSeer(chamberId: string, seerId: string): { deregistered: boolean; chamberDisposed: boolean; seer: ISeer | null } {
@@ -197,6 +202,51 @@ function retrieveSeers(chamberId: string): ISeer[] {
 	return Array.from(chamber.seers.values());
 }
 
+function fathomChamber(chamberId: string):
+	| (Pick<IChamber, "rite" | "riteStartedAt" | "casterId" | "omen" | "currentCycle"> & {
+			unveiledSeers: string[];
+			totalCycles: number;
+			terminus: number;
+	  })
+	| null {
+	const chamber = retrieveChamber(chamberId);
+
+	if (!chamber) return null;
+
+	let activeDurationMS = 0;
+
+	switch (chamber.rite) {
+		case Rites.CONSECRATION:
+			activeDurationMS = chamber.pact.consecrationDurationMS;
+			break;
+		case Rites.DIVINATION:
+			activeDurationMS = chamber.pact.divinationDurationMS;
+			break;
+		case Rites.MANIFESTATION:
+			activeDurationMS = chamber.pact.manifestationDurationMS;
+			break;
+		case Rites.REVELATION:
+			activeDurationMS = chamber.pact.revealDurationMS;
+			break;
+		default:
+			activeDurationMS = 0;
+			break;
+	}
+
+	const terminus = chamber.riteStartedAt + activeDurationMS;
+
+	return {
+		rite: chamber.rite,
+		riteStartedAt: chamber.riteStartedAt,
+		casterId: chamber.casterId,
+		omen: chamber.omen,
+		unveiledSeers: chamber.unveiledSeers.map((seer) => seer.seerId),
+		currentCycle: chamber.currentCycle,
+		totalCycles: chamber.pact.maxCycles,
+		terminus: terminus,
+	};
+}
+
 export default {
 	allocateChamber,
 	retrieveChamber,
@@ -206,4 +256,5 @@ export default {
 	registerSeer,
 	deregisterSeer,
 	retrieveSeers,
+	fathomChamber,
 };
